@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# iCloud
+.iCloud
+*.icloud
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (将来的に使う場合)
+node_modules/
+
+# Logs
+*.log
+
+# Local launch config (Claude Code)
+.claude/launch.json

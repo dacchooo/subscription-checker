@@ -1,0 +1,35 @@
+/* サブスク棚卸しチェッカー カスタムスタイル */
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.option-btn { will-change: transform; }
+.option-btn:active { transform: scale(0.98); }
+
+/* スコア★アニメーション */
+.score-star {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.score-star:hover { transform: scale(1.1); }
+
+/* 解約候補カードの強調 */
+.danger-pulse {
+  animation: dangerPulse 2s ease-in-out infinite;
+}
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+/* 入力フォームのフォーカス感 */
+input:focus, select:focus {
+  outline: none;
+  ring: 2px solid #10b981;
+}
+
+@media (max-width: 480px) {
+  h1 { letter-spacing: -0.02em; }
+}

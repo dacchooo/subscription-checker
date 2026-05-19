@@ -1,0 +1,128 @@
+// 共通スクリプト：サブスクのlocalStorage管理・スコアリング・GA4
+
+const STORAGE_KEY = 'subsk_kanri_subscriptions';
+const DATA_BASE = 'data';
+
+// ====== GA4 イベント計測ユーティリティ ======
+function trackEvent(eventName, params = {}) {
+  if (typeof window.gtag === 'function') {
+    try {
+      window.gtag('event', eventName, params);
+    } catch (e) {
+      // GA4が読み込まれていない場合は何もしない
+    }
+  }
+}
+
+// ====== データ読み込み ======
+async function loadJSON(path) {
+  const res = await fetch(`${DATA_BASE}/${path}`);
+  if (!res.ok) throw new Error(`Failed to load ${path}`);
+  return res.json();
+}
+
+async function loadAffiliates() {
+  const data = await loadJSON('affiliates.json');
+  return data.affiliates;
+}
+
+// ====== サブスクのlocalStorage管理 ======
+function loadSubscriptions() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSubscriptions(subs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(subs));
+}
+
+function clearSubscriptions() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+function addSubscription(sub) {
+  const subs = loadSubscriptions();
+  const newSub = {
+    id: 'sub_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+    name: sub.name,
+    price: Number(sub.price) || 0,
+    usage: sub.usage, // 'often' | 'sometimes' | 'unused'
+    createdAt: new Date().toISOString(),
+  };
+  subs.push(newSub);
+  saveSubscriptions(subs);
+  return newSub;
+}
+
+function deleteSubscription(id) {
+  const subs = loadSubscriptions().filter((s) => s.id !== id);
+  saveSubscriptions(subs);
+}
+
+// ====== スコアリングロジック ======
+// スコアの高いものほど解約候補
+function calcScore(sub) {
+  let score = 0;
+  // 使用頻度
+  if (sub.usage === 'unused') score += 50;
+  else if (sub.usage === 'sometimes') score += 20;
+  else score += 0; // often
+
+  // 月額金額
+  if (sub.price >= 3000) score += 30;
+  else if (sub.price >= 1000) score += 20;
+  else score += 10;
+
+  return score;
+}
+
+// スコア→★レベル（1〜5）
+function scoreToStars(score) {
+  if (score >= 80) return 5;
+  if (score >= 60) return 4;
+  if (score >= 40) return 3;
+  if (score >= 20) return 2;
+  return 1;
+}
+
+// スコア→ラベル
+function scoreToLabel(score) {
+  if (score >= 80) return { label: '即解約を検討', color: 'red', emoji: '🚨' };
+  if (score >= 60) return { label: '解約を強く検討', color: 'orange', emoji: '⚠️' };
+  if (score >= 40) return { label: '見直し余地あり', color: 'yellow', emoji: '🤔' };
+  if (score >= 20) return { label: '様子見でOK', color: 'blue', emoji: '👀' };
+  return { label: '継続でOK', color: 'green', emoji: '😊' };
+}
+
+// ====== 集計ヘルパー ======
+function calcSummary(subs) {
+  const monthlyTotal = subs.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+  const yearlyTotal = monthlyTotal * 12;
+
+  const scored = subs.map((s) => ({ ...s, score: calcScore(s), stars: scoreToStars(calcScore(s)) }));
+  // 解約候補=★4以上
+  const candidates = scored.filter((s) => s.stars >= 4);
+  const savingsMonthly = candidates.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+  const savingsYearly = savingsMonthly * 12;
+
+  return {
+    count: subs.length,
+    monthlyTotal,
+    yearlyTotal,
+    candidates,
+    savingsMonthly,
+    savingsYearly,
+    scored: scored.sort((a, b) => b.score - a.score),
+  };
+}
+
+// ====== 通貨フォーマット ======
+function formatJPY(n) {
+  return '¥' + Number(n).toLocaleString('ja-JP');
+}

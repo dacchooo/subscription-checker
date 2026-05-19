@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サブスク棚卸しチェッカー｜使ってないサブスクをあぶり出す</title>
+  <meta name="description" content="登録してるサブスクを3項目入力するだけで、解約候補をスコアリング。月額のムダを見える化して、家計を改善。">
+  <meta property="og:title" content="サブスク棚卸しチェッカー｜使ってないサブスクをあぶり出す">
+  <meta property="og:description" content="登録してるサブスクを3項目入力するだけで、解約候補をスコアリング。">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#10b981">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LYNYEMRMWH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LYNYEMRMWH');
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📋%3C/text%3E%3C/svg%3E">
+</head>
+<body class="bg-emerald-50 min-h-screen">
+  <main class="container mx-auto px-4 py-10 md:py-16">
+    <div class="max-w-xl mx-auto text-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-600 flex items-center justify-center text-4xl shadow-lg">📋</div>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">サブスク棚卸しチェッカー</h1>
+      <p class="text-gray-500 mb-8">使ってないサブスク、こっそりあぶり出そう</p>
+
+      <div class="text-left space-y-3 mb-8">
+        <div class="flex items-start gap-3">
+          <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-12 h-12 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
+          <div class="bg-white rounded-2xl px-4 py-3 shadow-sm border border-emerald-100 text-sm leading-relaxed text-gray-700 flex-1">
+            こんにちは、だっちょです！「気づいたら毎月引かれてるサブスク」、ちゃんと把握できてますか？
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-12 h-12 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
+          <div class="bg-white rounded-2xl px-4 py-3 shadow-sm border border-emerald-100 text-sm leading-relaxed text-gray-700 flex-1">
+            3項目入力するだけで、解約候補をスコアで可視化。月額のムダを「見える化」しちゃいましょう。
+          </div>
+        </div>
+      </div>
+
+      <ul class="text-left space-y-2 mb-10 text-gray-700">
+        <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✓</span>サブスク名・月額・使用頻度を入れるだけ</li>
+        <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✓</span>「解約検討度」を★1〜5で自動スコアリング</li>
+        <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✓</span>解約で浮く月額・年間の節約見込み額もわかる</li>
+        <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✓</span>入力内容はブラウザに保存（次回も続きから）</li>
+      </ul>
+
+      <a id="start-cta" href="app.html" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-full text-lg shadow-md transition mb-3">
+        棚卸しスタート
+      </a>
+      <p class="text-xs text-gray-500">無料・登録不要・3分で完了</p>
+
+      <div class="mt-10 bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 text-left">
+        <h2 class="text-sm font-bold text-emerald-700 mb-2">📖 関連記事</h2>
+        <a href="https://dacchooo-money.com/subscription-review/" target="_blank" rel="noopener" class="text-sm text-gray-700 hover:text-emerald-700 underline leading-relaxed">
+          サブスク棚卸しのコツをだっちょが解説した記事も参考にどうぞ →
+        </a>
+      </div>
+
+      <p class="text-xs text-gray-400 mt-12">※ 結果ページのリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。</p>
+      <p class="text-xs text-gray-500 mt-4 space-x-3">
+        <a href="about.html" class="hover:text-emerald-700 underline">運営者情報</a>
+        <a href="privacy.html" class="hover:text-emerald-700 underline">プライバシーポリシー</a>
+        <a href="terms.html" class="hover:text-emerald-700 underline">利用規約</a>
+      </p>
+    </div>
+  </main>
+  <script src="js/app.js?v=1"></script>
+  <script>
+    // スタートボタンのクリック計測
+    document.getElementById('start-cta')?.addEventListener('click', () => {
+      trackEvent('checker_start');
+    });
+  </script>
+</body>
+</html>

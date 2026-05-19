@@ -1,0 +1,327 @@
+// 結果ページ：スコアリング結果＋解約候補ランキング＋アフィリ訴求
+
+const TODAY = new Date().toISOString().split('T')[0];
+const LINE_OFFICIAL_URL_BASE = 'https://lin.ee/PLACEHOLDER';
+
+async function initResult() {
+  const subs = loadSubscriptions();
+  if (!subs || subs.length === 0) {
+    window.location.href = 'app.html';
+    return;
+  }
+
+  const affiliates = await loadAffiliates();
+  const summary = calcSummary(subs);
+
+  trackEvent('result_view', {
+    sub_count: summary.count,
+    monthly_total: summary.monthlyTotal,
+    yearly_total: summary.yearlyTotal,
+    candidate_count: summary.candidates.length,
+    savings_yearly: summary.savingsYearly,
+  });
+
+  renderResult(summary, affiliates);
+}
+
+function renderResult(summary, affiliates) {
+  const root = document.getElementById('result-root');
+  const { count, monthlyTotal, yearlyTotal, candidates, savingsMonthly, savingsYearly, scored } = summary;
+
+  // だっちょメッセージ：候補数で変わる
+  const characterMessages = buildCharacterMessages(summary);
+
+  // ランキング表示
+  const rankingHTML = scored.map((sub, idx) => renderSubRanking(sub, idx)).join('');
+
+  // 推奨アフィリ：状況に応じて切替
+  const affList = selectAffiliates(summary, affiliates);
+  const affHTML = affList.map(renderAffiliateCard).join('');
+
+  root.innerHTML = `
+    <div class="max-w-xl mx-auto" id="result-capture">
+      <!-- ヒーロー：結果サマリー -->
+      <div class="text-center mb-6">
+        <div class="text-sm text-emerald-700 font-bold mb-2">あなたのサブスク棚卸し結果</div>
+        <div class="text-5xl mb-3">${summary.candidates.length > 0 ? '🚨' : '✨'}</div>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">${candidates.length > 0 ? `解約候補が ${candidates.length}件 見つかりました` : '健全な家計です！'}</h1>
+        <p class="text-sm text-gray-500">登録サブスク ${count}件 / 月額合計 ${formatJPY(monthlyTotal)}</p>
+      </div>
+
+      <!-- 節約見込みカード（候補がある場合） -->
+      ${candidates.length > 0 ? `
+      <div class="bg-gradient-to-br from-red-500 to-orange-500 text-white rounded-2xl p-6 mb-6 shadow-md text-center">
+        <p class="text-xs opacity-90 mb-1">解約候補（★4以上）をすべて解約した場合</p>
+        <p class="text-xs opacity-90 mb-3">節約見込み額</p>
+        <p class="text-4xl md:text-5xl font-bold mb-1">${formatJPY(savingsYearly)}<span class="text-base font-normal">/年</span></p>
+        <p class="text-sm opacity-90">月額 ${formatJPY(savingsMonthly)} の削減</p>
+      </div>
+      ` : `
+      <div class="bg-emerald-600 text-white rounded-2xl p-6 mb-6 shadow-md text-center">
+        <p class="text-sm mb-2">解約候補は見つかりませんでした 👏</p>
+        <p class="text-xs opacity-90">登録したサブスクはどれもしっかり活用できているようです。</p>
+      </div>
+      `}
+
+      <!-- 月額・年間合計カード -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 text-center">
+          <p class="text-xs text-gray-500 mb-1">月額合計</p>
+          <p class="text-xl font-bold text-gray-800">${formatJPY(monthlyTotal)}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 text-center">
+          <p class="text-xs text-gray-500 mb-1">年間合計</p>
+          <p class="text-xl font-bold text-gray-800">${formatJPY(yearlyTotal)}</p>
+        </div>
+      </div>
+
+      <!-- だっちょメッセージ -->
+      ${characterMessages}
+
+      <!-- サブスク別ランキング -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+        <h2 class="text-base font-bold text-gray-800 mb-3">🏆 解約検討度ランキング</h2>
+        <p class="text-xs text-gray-500 mb-4">スコアが高いほど解約検討の優先度が高い目安です。最終判断はご自身の用途に合わせてください。</p>
+        ${rankingHTML}
+      </div>
+
+      <!-- アフィリ訴求 -->
+      <div class="bg-emerald-50 rounded-2xl p-5 mb-6 border border-emerald-100">
+        <h2 class="text-base font-bold text-gray-800 mb-1">${candidates.length > 0 ? '💡 浮いたお金、何に回す？' : '🌱 さらに家計を磨くなら'}</h2>
+        <p class="text-xs text-gray-600 mb-4">だっちょが実際に試して良かったサービスをまとめました。</p>
+        ${affHTML}
+      </div>
+
+      <!-- 関連記事リンク -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 mb-6">
+        <p class="text-sm text-gray-700 mb-2">📖 詳しい棚卸しのコツは記事でも解説してます</p>
+        <a id="blog-link" href="https://dacchooo-money.com/subscription-review/" target="_blank" rel="noopener" class="text-sm font-bold text-emerald-700 hover:underline">
+          サブスク棚卸し記事を読む →
+        </a>
+      </div>
+
+      <!-- フッター更新日 -->
+      <div class="bg-white border border-emerald-100 rounded-2xl p-4 mb-6 text-center">
+        <p class="text-xs text-gray-500">結果情報の最終更新：${TODAY}</p>
+      </div>
+    </div>
+
+    <div class="max-w-xl mx-auto">
+      <button id="share-btn" class="block w-full bg-white hover:bg-emerald-50 text-emerald-700 font-bold py-3 rounded-full border-2 border-emerald-600 transition mb-3">
+        📷 結果を画像で保存・SNSシェア
+      </button>
+      <a href="app.html" id="edit-cta" class="block w-full text-center bg-white hover:bg-emerald-50 text-emerald-700 font-bold py-3 rounded-full border-2 border-emerald-200 transition mb-3">
+        サブスクを追加・編集する
+      </a>
+      <a href="${LINE_OFFICIAL_URL_BASE}?from=subsk&candidates=${candidates.length}" id="line-cta" target="_blank" rel="noopener" class="block w-full text-center bg-[#06C755] hover:bg-[#05B04C] text-white font-bold py-3 rounded-full transition mb-3">
+        💚 LINEで節約ネタを定期的に受け取る
+      </a>
+      <a href="https://www.instagram.com/dacchooo_money/" id="insta-cta" target="_blank" rel="noopener" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full transition">
+        だっちょのインスタを見る
+      </a>
+      <p class="text-xs text-gray-400 text-center mt-8 leading-relaxed">※ このページ内のリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。掲載情報は目安であり、最新の内容は各公式サイトでご確認ください。</p>
+      <p class="text-xs text-gray-500 text-center mt-3 space-x-3">
+        <a href="about.html" class="hover:text-emerald-700 underline">運営者情報</a>
+        <a href="privacy.html" class="hover:text-emerald-700 underline">プライバシーポリシー</a>
+        <a href="terms.html" class="hover:text-emerald-700 underline">利用規約</a>
+      </p>
+      <p class="text-xs text-gray-400 text-center mt-3">© だっちょ｜お金・投資・節約</p>
+    </div>
+  `;
+
+  // クリック計測
+  root.querySelectorAll('a[data-affiliate-id]').forEach((a) => {
+    a.addEventListener('click', () => {
+      trackEvent('affiliate_click', {
+        affiliate_id: a.dataset.affiliateId,
+        affiliate_name: a.dataset.affiliateName,
+      });
+    });
+  });
+  document.getElementById('line-cta')?.addEventListener('click', () => {
+    trackEvent('line_signup_click', { candidates: summary.candidates.length });
+  });
+  document.getElementById('insta-cta')?.addEventListener('click', () => {
+    trackEvent('instagram_click');
+  });
+  document.getElementById('blog-link')?.addEventListener('click', () => {
+    trackEvent('blog_link_click');
+  });
+  document.getElementById('edit-cta')?.addEventListener('click', () => {
+    trackEvent('edit_subs_click');
+  });
+  document.getElementById('share-btn')?.addEventListener('click', () => {
+    trackEvent('share_click', { candidates: summary.candidates.length });
+    captureAndShare();
+  });
+}
+
+function buildCharacterMessages(summary) {
+  const { candidates, savingsYearly, count } = summary;
+  let messages = [];
+
+  if (candidates.length === 0) {
+    messages.push('登録されたサブスクはどれも活用度が高そうです！この調子で家計を整えていきましょう。');
+    messages.push('もしまだ登録漏れがあれば、追加して再度チェックしてみてくださいね。');
+  } else if (candidates.length === 1) {
+    messages.push(`「${escapeHtml(candidates[0].name)}」が解約候補に上がりました。本当に必要か、一度立ち止まって考えてみる価値ありです。`);
+    messages.push('1件でも解約できれば、その分を投資や貯蓄に回せます。小さな見直しが、1年後に大きな差を生みます。');
+  } else {
+    messages.push(`解約候補が ${candidates.length}件 見つかりました。全部解約すれば年間 ${formatJPY(savingsYearly)} の節約見込みです。`);
+    messages.push('ただし「使うかも…」の引きずられがちなので、まずは★5（最優先）から見直すのがオススメです。');
+  }
+
+  return messages.map((m) => `
+    <div class="flex items-start gap-3 mb-3">
+      <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-12 h-12 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
+      <div class="bg-white rounded-2xl px-4 py-3 shadow-sm border border-emerald-100 max-w-md text-sm leading-relaxed text-gray-700">${m}</div>
+    </div>
+  `).join('');
+}
+
+function renderSubRanking(sub, idx) {
+  const stars = sub.stars;
+  const starHTML = '★'.repeat(stars) + '☆'.repeat(5 - stars);
+  const label = scoreToLabel(sub.score);
+  const colorMap = {
+    red: 'bg-red-100 text-red-700 border-red-200',
+    orange: 'bg-orange-100 text-orange-700 border-orange-200',
+    yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    blue: 'bg-blue-100 text-blue-700 border-blue-200',
+    green: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  };
+  const colorClass = colorMap[label.color] || colorMap.blue;
+  const rankNum = idx + 1;
+
+  return `
+    <div class="flex items-start gap-3 p-3 ${stars >= 4 ? 'bg-red-50' : 'bg-emerald-50'} rounded-xl mb-2">
+      <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white text-gray-700 text-sm font-bold flex items-center justify-center border ${stars >= 4 ? 'border-red-200' : 'border-emerald-200'}">${rankNum}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1 flex-wrap">
+          <p class="font-bold text-gray-800 text-sm truncate">${escapeHtml(sub.name)}</p>
+          <span class="text-xs ${colorClass} border px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${label.emoji} ${label.label}</span>
+        </div>
+        <p class="text-xs text-gray-600">月額 ${formatJPY(sub.price)}</p>
+        <p class="text-yellow-500 text-sm mt-1">${starHTML}</p>
+      </div>
+    </div>
+  `;
+}
+
+function selectAffiliates(summary, affiliates) {
+  const { candidates } = summary;
+  const logic = ['money-career-default', 'abcash']; // always
+  if (candidates.length >= 3) {
+    logic.push('money-career-lifeplan');
+  }
+  if (candidates.length <= 1) {
+    logic.push('gfs');
+    logic.push('torches');
+  } else {
+    logic.push('gfs');
+  }
+  return logic.map((id) => ({ id, ...affiliates[id] })).filter((a) => a.name);
+}
+
+function renderAffiliateCard(a) {
+  return `
+    <article class="bg-white rounded-xl shadow-sm border border-emerald-100 overflow-hidden mb-3">
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">${a.category}</span>
+          <span class="text-xs font-bold text-gray-400">PR</span>
+        </div>
+        <h4 class="text-base font-bold text-gray-800 mb-0.5">${a.name}</h4>
+        <p class="text-xs text-emerald-700 font-bold mb-2">${a.tagline}</p>
+        <div class="flex items-start gap-2 mb-3 p-2 bg-emerald-50 rounded-lg">
+          <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-7 h-7 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
+          <p class="text-xs text-gray-700 leading-relaxed">${a.characterComment}</p>
+        </div>
+        <a href="${a.url}" target="_blank" rel="noopener sponsored" data-affiliate-id="${a.id}" data-affiliate-name="${a.name}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2.5 rounded-full transition">
+          詳しく見る →
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+async function captureAndShare() {
+  const btn = document.getElementById('share-btn');
+  if (!window.html2canvas) {
+    alert('画像生成ライブラリが読み込めませんでした。再読み込みしてもう一度お試しください。');
+    return;
+  }
+  const target = document.getElementById('result-capture');
+  if (!target) return;
+
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ 画像生成中…';
+  btn.disabled = true;
+
+  try {
+    const canvas = await window.html2canvas(target, {
+      backgroundColor: '#ecfdf5',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert('画像生成に失敗しました。');
+        btn.textContent = originalText;
+        btn.disabled = false;
+        return;
+      }
+      const filename = `subsk-tanaoroshi-${Date.now()}.png`;
+      const file = new File([blob], filename, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'サブスク棚卸し結果',
+            text: '自分のサブスク、棚卸ししてみたよ！',
+          });
+          trackEvent('share_success', { method: 'web_share_api' });
+          btn.textContent = originalText;
+          btn.disabled = false;
+          return;
+        } catch (e) {
+          // キャンセル時はDLにフォールバック
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      trackEvent('share_success', { method: 'download' });
+      btn.textContent = '✅ 画像を保存しました！';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }, 2000);
+    }, 'image/png');
+  } catch (e) {
+    console.error(e);
+    alert('画像生成に失敗しました。');
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+document.addEventListener('DOMContentLoaded', initResult);

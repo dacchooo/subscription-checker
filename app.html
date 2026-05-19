@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サブスク登録｜サブスク棚卸しチェッカー</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#10b981">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LYNYEMRMWH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LYNYEMRMWH');
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📋%3C/text%3E%3C/svg%3E">
+</head>
+<body class="bg-emerald-50 min-h-screen">
+  <main class="container mx-auto px-4 py-6 md:py-10">
+    <div class="max-w-xl mx-auto">
+      <!-- ヘッダー -->
+      <div class="flex items-center justify-between mb-5">
+        <a href="index.html" class="text-emerald-700 text-sm font-bold">← トップ</a>
+        <h1 class="text-lg font-bold text-gray-800">サブスク棚卸し</h1>
+        <a id="result-cta" href="result.html" class="bg-emerald-600 text-white text-sm font-bold px-3 py-1.5 rounded-full hover:bg-emerald-700 transition">結果を見る →</a>
+      </div>
+
+      <!-- だっちょメッセージ -->
+      <div class="flex items-start gap-3 mb-5">
+        <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-12 h-12 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
+        <div id="dacchooo-message" class="bg-white rounded-2xl px-4 py-3 shadow-sm border border-emerald-100 max-w-md text-sm leading-relaxed text-gray-700">
+          サブスクをひとつずつ登録してください。思い出せる分だけでOKです！
+        </div>
+      </div>
+
+      <!-- 入力フォーム -->
+      <form id="sub-form" class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+        <h2 class="text-base font-bold text-gray-800 mb-4">➕ サブスクを追加</h2>
+
+        <div class="mb-4">
+          <label for="sub-name" class="block text-sm font-bold text-gray-700 mb-1">サービス名</label>
+          <input id="sub-name" name="name" type="text" required maxlength="40" placeholder="例: Netflix, Spotify, Amazon Prime" class="w-full p-3 border-2 border-emerald-100 rounded-xl text-gray-800 focus:border-emerald-500 outline-none transition">
+          <p class="text-xs text-gray-500 mt-1">思い出した順でOK</p>
+        </div>
+
+        <div class="mb-4">
+          <label for="sub-price" class="block text-sm font-bold text-gray-700 mb-1">月額（円）</label>
+          <input id="sub-price" name="price" type="number" required min="0" max="100000" step="1" placeholder="例: 1490" class="w-full p-3 border-2 border-emerald-100 rounded-xl text-gray-800 focus:border-emerald-500 outline-none transition">
+          <p class="text-xs text-gray-500 mt-1">税込価格・年払いなら12で割った金額（目安）</p>
+        </div>
+
+        <div class="mb-4">
+          <span class="block text-sm font-bold text-gray-700 mb-2">最近、使ってますか？</span>
+          <div class="grid grid-cols-1 gap-2">
+            <label class="usage-label flex items-center gap-3 p-3 border-2 border-emerald-100 rounded-xl cursor-pointer hover:bg-emerald-50 transition">
+              <input type="radio" name="usage" value="often" required class="accent-emerald-600">
+              <span class="text-xl">😊</span>
+              <span class="text-sm text-gray-700"><strong>よく使ってる</strong>（週1回以上）</span>
+            </label>
+            <label class="usage-label flex items-center gap-3 p-3 border-2 border-emerald-100 rounded-xl cursor-pointer hover:bg-emerald-50 transition">
+              <input type="radio" name="usage" value="sometimes" class="accent-emerald-600">
+              <span class="text-xl">🤔</span>
+              <span class="text-sm text-gray-700"><strong>たまに使う</strong>（月に数回）</span>
+            </label>
+            <label class="usage-label flex items-center gap-3 p-3 border-2 border-emerald-100 rounded-xl cursor-pointer hover:bg-emerald-50 transition">
+              <input type="radio" name="usage" value="unused" class="accent-emerald-600">
+              <span class="text-xl">😴</span>
+              <span class="text-sm text-gray-700"><strong>1ヶ月以上使ってない</strong></span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full transition">
+          このサブスクを追加 ➕
+        </button>
+      </form>
+
+      <!-- 登録済みサブスク一覧 -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-gray-800">📦 登録済み（<span id="sub-count">0</span>件）</h2>
+          <button id="clear-all-btn" class="text-xs text-red-600 hover:text-red-700 underline hidden">全部消す</button>
+        </div>
+        <div id="sub-list" class="space-y-2">
+          <!-- JSで動的に挿入 -->
+        </div>
+        <div id="empty-state" class="bg-white rounded-2xl p-6 text-center text-sm text-gray-500 border border-dashed border-emerald-200">
+          まだ登録されていません。<br>上のフォームから1件目を追加してください。
+        </div>
+      </div>
+
+      <!-- 結果を見るボタン -->
+      <a id="result-cta-bottom" href="result.html" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-full text-lg shadow-md transition mb-4 hidden">
+        結果を見る（解約候補をチェック） →
+      </a>
+
+      <p class="text-xs text-gray-400 text-center leading-relaxed">※ 入力したデータはあなたのブラウザにのみ保存されます。サーバーには送られません。</p>
+      <p class="text-xs text-gray-500 text-center mt-3 space-x-3">
+        <a href="about.html" class="hover:text-emerald-700 underline">運営者情報</a>
+        <a href="privacy.html" class="hover:text-emerald-700 underline">プライバシーポリシー</a>
+        <a href="terms.html" class="hover:text-emerald-700 underline">利用規約</a>
+      </p>
+    </div>
+  </main>
+  <script src="js/app.js?v=1"></script>
+  <script src="js/manage.js?v=1"></script>
+</body>
+</html>

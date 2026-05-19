@@ -1,0 +1,76 @@
+{
+  "_note": "全案件にPR表記必須。体験済み案件のみ掲載（feedback_unexperienced_affiliate_priority準拠）。URLは原則だっちょブログ経由（dacchooo-money.com）→記事内にPR表記＋アフィリリンク。",
+  "_lastUpdated": "2026-05-18",
+  "affiliates": {
+    "money-career-default": {
+      "name": "マネーキャリア（FP無料相談）",
+      "tagline": "プロのFPに家計を見てもらえる無料相談",
+      "category": "FP無料相談",
+      "url": "https://dacchooo-money.com/money-career/",
+      "features": [
+        "完全無料で何度でも相談OK",
+        "オンラインで自宅から完結",
+        "保険の押し売りなし"
+      ],
+      "characterComment": "サブスクの見直しが終わったら、家計全体もぜひ一度プロに見てもらってください。第三者の目線が入るとムダがクリアに見えます。",
+      "experienced": true
+    },
+    "money-career-lifeplan": {
+      "name": "マネーキャリア（ライフプラン相談）",
+      "tagline": "将来の家計シミュレーションを無料で",
+      "category": "FP無料相談・ライフプラン",
+      "url": "https://dacchooo-money.com/money-career/",
+      "features": [
+        "将来の収支をシミュレーション",
+        "教育費・老後資金の準備度がわかる",
+        "完全無料"
+      ],
+      "characterComment": "サブスクで浮いたお金、何に回す？が決まらない人にオススメ。「将来お金足りるかな？」の答え合わせができます。",
+      "experienced": true
+    },
+    "abcash": {
+      "name": "ABCash（無料体験）",
+      "tagline": "お金の不安をプロに相談できる無料体験",
+      "category": "マネースクール（無料体験）",
+      "url": "https://dacchooo-money.com/abcash/",
+      "features": [
+        "完全無料の体験会",
+        "マンツーマン相談スタイル",
+        "オンラインで受講可能"
+      ],
+      "characterComment": "ぼくは無料体験だけ受けました。家計改善を「習慣」にしたい人には、コーチが伴走してくれるABCashが効きます。",
+      "experienced": true
+    },
+    "gfs": {
+      "name": "GFS無料講座",
+      "tagline": "投資の基礎を無料動画でサクッと学べる",
+      "category": "投資スクール（無料）",
+      "url": "https://dacchooo-money.com/bafessa-2/",
+      "features": [
+        "完全無料の動画講座",
+        "投資の基礎が体系的に学べる",
+        "登録は1分で完了"
+      ],
+      "characterComment": "サブスク代を浮かせたら、次は「お金を働かせる」フェーズ。GFSは完全無料で投資の基礎が学べるのでまずココから。",
+      "experienced": true
+    },
+    "torches": {
+      "name": "TORCHES",
+      "tagline": "1万円から始められる不動産少額投資",
+      "category": "不動産クラウドファンディング",
+      "url": "https://dacchooo-money.com/torches/",
+      "features": [
+        "1万円から投資可能",
+        "プロが厳選した案件のみ",
+        "口座開設は無料"
+      ],
+      "characterComment": "ぼくも口座開設しました。サブスク数千円が「資産」に化ける感覚は、家計が前向きになります。",
+      "experienced": true
+    }
+  },
+  "_recommendation_logic": {
+    "always": ["money-career-default", "abcash"],
+    "many_candidates": ["money-career-lifeplan"],
+    "healthy": ["gfs", "torches"]
+  }
+}
