@@ -1,7 +1,9 @@
-// 結果ページ：スコアリング結果＋解約候補ランキング＋アフィリ訴求
+// 結果ページ：スコアリング結果＋解約候補ランキング＋カテゴリ別円グラフ＋アフィリ訴求
 
 const TODAY = new Date().toISOString().split('T')[0];
 const LINE_OFFICIAL_URL_BASE = 'https://lin.ee/PLACEHOLDER';
+
+let _categories = [];
 
 async function initResult() {
   const subs = loadSubscriptions();
@@ -10,8 +12,13 @@ async function initResult() {
     return;
   }
 
-  const affiliates = await loadAffiliates();
+  const [affiliates, popular] = await Promise.all([
+    loadAffiliates(),
+    loadPopularSubscriptions(),
+  ]);
+  _categories = popular.categories;
   const summary = calcSummary(subs);
+  const categorySummary = calcCategorySummary(subs, _categories);
 
   trackEvent('result_view', {
     sub_count: summary.count,
@@ -21,10 +28,77 @@ async function initResult() {
     savings_yearly: summary.savingsYearly,
   });
 
-  renderResult(summary, affiliates);
+  renderResult(summary, affiliates, categorySummary);
+  // renderResult後にChart.js初期化
+  renderCategoryChart(categorySummary);
 }
 
-function renderResult(summary, affiliates) {
+function calcCategorySummary(subs, categories) {
+  const byCategory = {};
+  for (const s of subs) {
+    const catId = s.category || 'other';
+    if (!byCategory[catId]) byCategory[catId] = { total: 0, count: 0 };
+    byCategory[catId].total += Number(s.price) || 0;
+    byCategory[catId].count += 1;
+  }
+  // 金額順にソート
+  const entries = Object.entries(byCategory)
+    .map(([id, data]) => {
+      const cat = categories.find((c) => c.id === id) || { id, label: 'その他', emoji: '📦', color: '#94a3b8' };
+      return { id, label: cat.label, emoji: cat.emoji, color: cat.color, total: data.total, count: data.count };
+    })
+    .filter((e) => e.total > 0)
+    .sort((a, b) => b.total - a.total);
+  return entries;
+}
+
+function renderCategoryChart(categorySummary) {
+  const ctx = document.getElementById('category-chart');
+  if (!ctx || !window.Chart || categorySummary.length === 0) return;
+
+  try {
+    new window.Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: categorySummary.map((c) => `${c.emoji} ${c.label}`),
+        datasets: [{
+          data: categorySummary.map((c) => c.total),
+          backgroundColor: categorySummary.map((c) => c.color),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 10,
+              boxWidth: 14,
+              font: { size: 11 },
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const v = context.parsed;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                return `¥${v.toLocaleString('ja-JP')} (${pct}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+  } catch (e) {
+    console.error('Chart render error:', e);
+  }
+}
+
+function renderResult(summary, affiliates, categorySummary) {
   const root = document.getElementById('result-root');
   const { count, monthlyTotal, yearlyTotal, candidates, savingsMonthly, savingsYearly, scored } = summary;
 
@@ -74,6 +148,29 @@ function renderResult(summary, affiliates) {
           <p class="text-xl font-bold text-gray-800">${formatJPY(yearlyTotal)}</p>
         </div>
       </div>
+
+      <!-- カテゴリ別 円グラフ -->
+      ${categorySummary && categorySummary.length > 0 ? `
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+        <h2 class="text-base font-bold text-gray-800 mb-1">📊 カテゴリ別の月額内訳</h2>
+        <p class="text-xs text-gray-500 mb-4">どこにお金が流れてるかチェック</p>
+        <div class="relative mx-auto" style="max-width: 280px;">
+          <canvas id="category-chart"></canvas>
+        </div>
+        <div class="mt-4 space-y-1">
+          ${categorySummary.slice(0, 5).map((c) => `
+            <div class="flex items-center justify-between text-xs">
+              <span class="flex items-center gap-1">
+                <span class="inline-block w-3 h-3 rounded-full" style="background-color: ${c.color};"></span>
+                ${c.emoji} ${c.label}（${c.count}件）
+              </span>
+              <span class="font-bold text-gray-800">${formatJPY(c.total)}<span class="text-gray-400">/月</span></span>
+            </div>
+          `).join('')}
+          ${categorySummary.length > 5 ? `<p class="text-xs text-gray-400 text-center pt-1">他 ${categorySummary.length - 5}カテゴリ</p>` : ''}
+        </div>
+      </div>
+      ` : ''}
 
       <!-- だっちょメッセージ -->
       ${characterMessages}
@@ -128,6 +225,11 @@ function renderResult(summary, affiliates) {
       <p class="text-xs text-gray-400 text-center mt-3">© だっちょ｜お金・投資・節約</p>
     </div>
   `;
+
+  // 詳細チェックボタン（Phase 3）
+  root.querySelectorAll('.detail-check-btn').forEach((btn) => {
+    btn.addEventListener('click', () => openDetailCheckModal(btn.dataset.detailId));
+  });
 
   // クリック計測
   root.querySelectorAll('a[data-affiliate-id]').forEach((a) => {
@@ -192,6 +294,8 @@ function renderSubRanking(sub, idx) {
   };
   const colorClass = colorMap[label.color] || colorMap.blue;
   const rankNum = idx + 1;
+  const cat = findCategoryById(_categories, sub.category);
+  const hasDetail = !!sub.detail;
 
   return `
     <div class="flex items-start gap-3 p-3 ${stars >= 4 ? 'bg-red-50' : 'bg-emerald-50'} rounded-xl mb-2">
@@ -201,8 +305,11 @@ function renderSubRanking(sub, idx) {
           <p class="font-bold text-gray-800 text-sm truncate">${escapeHtml(sub.name)}</p>
           <span class="text-xs ${colorClass} border px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${label.emoji} ${label.label}</span>
         </div>
-        <p class="text-xs text-gray-600">月額 ${formatJPY(sub.price)}</p>
+        <p class="text-xs text-gray-600">月額 ${formatJPY(sub.price)} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
         <p class="text-yellow-500 text-sm mt-1">${starHTML}</p>
+        <button data-detail-id="${sub.id}" class="detail-check-btn mt-2 text-xs font-bold text-emerald-700 hover:text-emerald-800 underline">
+          ${hasDetail ? '✓ 詳しくチェック済み（再診断）' : '🔍 もっと詳しくチェック（3タップ）'}
+        </button>
       </div>
     </div>
   `;
@@ -322,6 +429,159 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// ====== Phase 3: 「本当に使ってる？」3タップ追加診断 ======
+
+const DETAIL_QUESTIONS = [
+  {
+    id: 'usedLastMonth',
+    title: '先月、実際に使いましたか？',
+    subtitle: '「ログインしたかどうか」レベルでOK',
+    options: [
+      { label: '使った', value: true, emoji: '😊' },
+      { label: '使ってない', value: false, emoji: '😴' },
+    ],
+  },
+  {
+    id: 'hasAlternative',
+    title: '無料の代替手段はありますか？',
+    subtitle: '別の無料サービスで代わりが効くかどうか',
+    options: [
+      { label: 'ある', value: true, emoji: '🆓' },
+      { label: 'ない', value: false, emoji: '🚫' },
+    ],
+  },
+  {
+    id: 'cancelEase',
+    title: '解約しても困らない可能性は？',
+    subtitle: 'あなたの肌感覚で',
+    options: [
+      { label: '高い（すぐ解約できそう）', value: 'easy', emoji: '🎯' },
+      { label: '中くらい', value: 'medium', emoji: '🤔' },
+      { label: '低い（必要）', value: 'hard', emoji: '🛡️' },
+    ],
+  },
+];
+
+let _detailState = null;
+
+function openDetailCheckModal(subId) {
+  const subs = loadSubscriptions();
+  const sub = subs.find((s) => s.id === subId);
+  if (!sub) return;
+
+  _detailState = {
+    subId,
+    subName: sub.name,
+    questionIndex: 0,
+    answers: {},
+  };
+
+  trackEvent('detail_check_open', { sub_id: subId });
+  renderDetailModal();
+}
+
+function renderDetailModal() {
+  const { questionIndex, answers, subName } = _detailState;
+  const q = DETAIL_QUESTIONS[questionIndex];
+  const progress = Math.round(((questionIndex) / DETAIL_QUESTIONS.length) * 100);
+
+  // 既存のモーダルを削除
+  document.getElementById('detail-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'detail-modal';
+  modal.className = 'fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 p-0 md:p-4';
+  modal.innerHTML = `
+    <div class="bg-white w-full max-w-md rounded-t-2xl md:rounded-2xl shadow-xl">
+      <div class="p-5">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-xs text-emerald-700 font-bold">🔍 詳しくチェック</p>
+          <button id="detail-close" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+        </div>
+        <p class="text-sm font-bold text-gray-800 mb-1 truncate">${escapeHtml(subName)}</p>
+        <div class="w-full h-1.5 bg-emerald-100 rounded-full overflow-hidden mb-5">
+          <div class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 mb-1">${q.title}</h3>
+        <p class="text-xs text-gray-500 mb-4">${q.subtitle}</p>
+        <div class="grid gap-2 mb-2">
+          ${q.options.map((opt, i) => `
+            <button data-answer-index="${i}" class="detail-answer-btn w-full text-left p-4 bg-white border-2 border-emerald-100 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition flex items-center gap-3">
+              <span class="text-2xl">${opt.emoji}</span>
+              <span class="font-bold text-gray-800">${opt.label}</span>
+            </button>
+          `).join('')}
+        </div>
+        <p class="text-xs text-gray-400 text-center mt-3">質問 ${questionIndex + 1} / ${DETAIL_QUESTIONS.length}</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // イベント設定
+  modal.querySelector('#detail-close')?.addEventListener('click', closeDetailModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeDetailModal();
+  });
+  modal.querySelectorAll('.detail-answer-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.answerIndex);
+      const option = q.options[idx];
+      _detailState.answers[q.id] = option.value;
+      _detailState.questionIndex++;
+
+      if (_detailState.questionIndex >= DETAIL_QUESTIONS.length) {
+        finishDetailCheck();
+      } else {
+        renderDetailModal();
+      }
+    });
+  });
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal')?.remove();
+  _detailState = null;
+}
+
+async function finishDetailCheck() {
+  const { subId, answers } = _detailState;
+  updateSubscriptionDetail(subId, answers);
+  trackEvent('detail_check_complete', {
+    sub_id: subId,
+    usedLastMonth: answers.usedLastMonth,
+    hasAlternative: answers.hasAlternative,
+    cancelEase: answers.cancelEase,
+  });
+
+  closeDetailModal();
+
+  // 結果ページを再描画（スコア再計算）
+  const subs = loadSubscriptions();
+  const affiliates = await loadAffiliates();
+  const popular = await loadPopularSubscriptions();
+  _categories = popular.categories;
+  const summary = calcSummary(subs);
+  const categorySummary = calcCategorySummary(subs, _categories);
+  renderResult(summary, affiliates, categorySummary);
+  renderCategoryChart(categorySummary);
+
+  // 完了通知トースト
+  showToast('✓ 再診断完了！スコアを更新しました');
+}
+
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.5s';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 500);
+  }, 2000);
 }
 
 document.addEventListener('DOMContentLoaded', initResult);

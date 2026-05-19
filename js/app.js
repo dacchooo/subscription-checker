@@ -26,6 +26,18 @@ async function loadAffiliates() {
   return data.affiliates;
 }
 
+async function loadPopularSubscriptions() {
+  const data = await loadJSON('popular_subscriptions.json');
+  return {
+    categories: data.categories || [],
+    subscriptions: data.subscriptions || [],
+  };
+}
+
+function findCategoryById(categories, id) {
+  return categories.find((c) => c.id === id) || { id: 'other', label: 'その他', emoji: '📦', color: '#94a3b8' };
+}
+
 // ====== サブスクのlocalStorage管理 ======
 function loadSubscriptions() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -53,6 +65,8 @@ function addSubscription(sub) {
     name: sub.name,
     price: Number(sub.price) || 0,
     usage: sub.usage, // 'often' | 'sometimes' | 'unused'
+    category: sub.category || 'other', // カテゴリID（'video' / 'music' / etc）
+    detail: sub.detail || null, // Phase 3 追加診断結果（後で使う）
     createdAt: new Date().toISOString(),
   };
   subs.push(newSub);
@@ -79,7 +93,30 @@ function calcScore(sub) {
   else if (sub.price >= 1000) score += 20;
   else score += 10;
 
+  // 追加診断（Phase 3）が完了している場合のボーナス加点
+  if (sub.detail) {
+    const d = sub.detail;
+    // Q1: 先月実際に使ったか（false=使ってない）
+    if (d.usedLastMonth === false) score += 25;
+    // Q2: 代替手段があるか（true=ある）
+    if (d.hasAlternative === true) score += 15;
+    // Q3: 解約しても困らないか（'easy'=高い）
+    if (d.cancelEase === 'easy') score += 20;
+    else if (d.cancelEase === 'medium') score += 10;
+  }
+
   return score;
+}
+
+// サブスクの detail を更新（Phase 3 追加診断の保存）
+function updateSubscriptionDetail(id, detail) {
+  const subs = loadSubscriptions();
+  const sub = subs.find((s) => s.id === id);
+  if (!sub) return null;
+  sub.detail = detail;
+  sub.detailUpdatedAt = new Date().toISOString();
+  saveSubscriptions(subs);
+  return sub;
 }
 
 // スコア→★レベル（1〜5）

@@ -1,0 +1,63 @@
+{
+  "_note": "よくあるサブスクのリスト。月額金額は公式の標準プラン目安（2026-05時点・参考）。実際の契約金額はユーザー各自確認。最終更新日は_lastUpdatedで管理。",
+  "_lastUpdated": "2026-05-20",
+  "_priceDisclaimer": "金額は公式の標準プラン参考値。家族プラン・キャンペーン・年払い等で実額は変わります。",
+  "categories": [
+    { "id": "video", "label": "動画配信", "emoji": "🎬", "color": "#ef4444" },
+    { "id": "music", "label": "音楽", "emoji": "🎵", "color": "#f59e0b" },
+    { "id": "ai", "label": "AI・効率化", "emoji": "🤖", "color": "#3b82f6" },
+    { "id": "cloud", "label": "クラウド・ストレージ", "emoji": "☁️", "color": "#06b6d4" },
+    { "id": "books", "label": "電子書籍・雑誌", "emoji": "📚", "color": "#8b5cf6" },
+    { "id": "news", "label": "ニュース・メディア", "emoji": "📰", "color": "#64748b" },
+    { "id": "learning", "label": "学習・自己投資", "emoji": "🎓", "color": "#10b981" },
+    { "id": "fitness", "label": "ジム・フィットネス", "emoji": "💪", "color": "#84cc16" },
+    { "id": "shopping", "label": "ショッピング・特典", "emoji": "🛒", "color": "#ec4899" },
+    { "id": "creative", "label": "クリエイティブ", "emoji": "🎨", "color": "#a855f7" },
+    { "id": "other", "label": "その他", "emoji": "📦", "color": "#94a3b8" }
+  ],
+  "subscriptions": [
+    { "name": "Netflix（スタンダード）", "price": 1590, "category": "video" },
+    { "name": "Amazon Prime Video", "price": 600, "category": "video" },
+    { "name": "Disney+", "price": 990, "category": "video" },
+    { "name": "Hulu", "price": 1026, "category": "video" },
+    { "name": "U-NEXT", "price": 2189, "category": "video" },
+    { "name": "DAZN", "price": 4200, "category": "video" },
+    { "name": "ABEMAプレミアム", "price": 1080, "category": "video" },
+    { "name": "Apple TV+", "price": 900, "category": "video" },
+
+    { "name": "Spotify Premium", "price": 980, "category": "music" },
+    { "name": "Apple Music", "price": 1080, "category": "music" },
+    { "name": "YouTube Premium", "price": 1280, "category": "music" },
+    { "name": "Amazon Music Unlimited", "price": 1080, "category": "music" },
+
+    { "name": "ChatGPT Plus", "price": 3000, "category": "ai" },
+    { "name": "Claude Pro", "price": 3000, "category": "ai" },
+    { "name": "Gemini Advanced", "price": 2900, "category": "ai" },
+    { "name": "Notion 有料プラン", "price": 1650, "category": "ai" },
+    { "name": "Canva Pro", "price": 1500, "category": "ai" },
+
+    { "name": "iCloud+ (200GB)", "price": 400, "category": "cloud" },
+    { "name": "Google One (100GB)", "price": 250, "category": "cloud" },
+    { "name": "Dropbox Plus", "price": 1500, "category": "cloud" },
+
+    { "name": "Kindle Unlimited", "price": 980, "category": "books" },
+    { "name": "dマガジン", "price": 580, "category": "books" },
+    { "name": "コミックシーモア読み放題", "price": 780, "category": "books" },
+
+    { "name": "日経電子版", "price": 4277, "category": "news" },
+    { "name": "NewsPicks プレミアム", "price": 1850, "category": "news" },
+
+    { "name": "スタディサプリ（ベーシック）", "price": 2178, "category": "learning" },
+    { "name": "Duolingo Plus", "price": 1300, "category": "learning" },
+    { "name": "Audible", "price": 1500, "category": "learning" },
+
+    { "name": "ジム月会費", "price": 8000, "category": "fitness" },
+    { "name": "ヨガスタジオ", "price": 12000, "category": "fitness" },
+
+    { "name": "Amazon Prime", "price": 600, "category": "shopping" },
+    { "name": "X Premium", "price": 1380, "category": "shopping" },
+
+    { "name": "Adobe Creative Cloud", "price": 6480, "category": "creative" },
+    { "name": "Figma 有料プラン", "price": 1800, "category": "creative" }
+  ]
+}
