@@ -72,6 +72,22 @@
           <p class="text-xs text-gray-500 mt-1">結果ページの円グラフ表示に使います</p>
         </div>
 
+        <details class="bg-gray-50 rounded-xl p-3 mb-4">
+          <summary class="text-sm font-bold text-gray-700 cursor-pointer">📅 引き落とし日・トライアル期限を設定（任意）</summary>
+          <div class="mt-3 space-y-3">
+            <div>
+              <label for="sub-billing-day" class="block text-xs font-bold text-gray-600 mb-1">毎月の引き落とし日</label>
+              <select id="sub-billing-day" name="billingDay" class="w-full p-2 bg-white border-2 border-gray-200 rounded-lg text-sm">
+                <option value="">設定しない</option>
+              </select>
+            </div>
+            <div>
+              <label for="sub-trial-end" class="block text-xs font-bold text-gray-600 mb-1">無料トライアル終了日</label>
+              <input id="sub-trial-end" name="trialEndDate" type="date" class="w-full p-2 bg-white border-2 border-gray-200 rounded-lg text-sm">
+            </div>
+          </div>
+        </details>
+
         <div class="mb-4">
           <span class="block text-sm font-bold text-gray-700 mb-2">最近、使ってますか？</span>
           <div class="grid grid-cols-1 gap-2">
@@ -143,7 +159,7 @@
       </p>
     </div>
   </main>
-  <script src="js/app.js?v=5"></script>
-  <script src="js/manage.js?v=5"></script>
+  <script src="js/app.js?v=7"></script>
+  <script src="js/manage.js?v=7"></script>
 </body>
 </html>

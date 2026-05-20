@@ -71,6 +71,8 @@ function addSubscription(sub) {
     category: sub.category || 'other', // カテゴリID
     cancelUrl: sub.cancelUrl || null, // Phase 5-D: 解約ページURL
     detail: sub.detail || null, // Phase 3 追加診断結果
+    billingDay: sub.billingDay ? Number(sub.billingDay) : null, // Phase 7: 引き落とし日（1-31）
+    trialEndDate: sub.trialEndDate || null, // Phase 8: 無料トライアル終了日（YYYY-MM-DD）
     createdAt: new Date().toISOString(),
   };
   subs.push(newSub);
@@ -166,4 +168,38 @@ function calcSummary(subs) {
 // ====== 通貨フォーマット ======
 function formatJPY(n) {
   return '¥' + Number(n).toLocaleString('ja-JP');
+}
+
+// ====== Phase 9: 履歴スナップショット ======
+const SNAPSHOTS_KEY = 'subsk_kanri_snapshots';
+
+function loadSnapshots() {
+  try {
+    const raw = localStorage.getItem(SNAPSHOTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSnapshot(snapshot) {
+  const snapshots = loadSnapshots();
+  // 同じ日のスナップショットは上書き
+  const today = new Date().toISOString().split('T')[0];
+  const filtered = snapshots.filter((s) => s.date !== today);
+  filtered.push({ ...snapshot, date: today, savedAt: new Date().toISOString() });
+  // 最新12件のみ保持
+  const trimmed = filtered.slice(-12);
+  localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(trimmed));
+}
+
+function getLatestPreviousSnapshot() {
+  const snapshots = loadSnapshots();
+  const today = new Date().toISOString().split('T')[0];
+  // 今日以外の最新を取得
+  const previous = snapshots.filter((s) => s.date !== today);
+  if (previous.length === 0) return null;
+  return previous[previous.length - 1];
 }

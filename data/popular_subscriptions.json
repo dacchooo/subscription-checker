@@ -28,7 +28,7 @@
       ]
     },
     { "name": "Amazon Prime Video", "category": "video", "icon": "primevideo", "brandColor": "00A8E1",
-      "cancelUrl": "https://www.amazon.co.jp/gp/video/settings/payment-settings",
+      "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=GH9PE4HPSCNBNRX9",
       "plans": [{ "label": "月額", "price": 600, "default": true }, { "label": "年額/月割", "price": 492 }]
     },
     { "name": "Disney+", "category": "video", "icon": "disneyplus", "brandColor": "113CCF",
@@ -100,37 +100,37 @@
       "plans": [{ "label": "Plus", "price": 3000, "default": true }, { "label": "Pro", "price": 30000 }]
     },
     { "name": "Claude Pro", "category": "ai", "icon": "anthropic", "brandColor": "D97757",
-      "cancelUrl": "https://claude.ai/settings/billing",
+      "cancelUrl": "https://support.anthropic.com/en/articles/8324034-how-do-i-cancel-my-claude-pro-subscription",
       "plans": [{ "label": "Pro", "price": 3000, "default": true }, { "label": "Max", "price": 15000 }]
     },
     { "name": "Gemini Advanced", "category": "ai", "icon": "googlegemini", "brandColor": "8E75B2",
-      "cancelUrl": "https://one.google.com/u/0/storage",
+      "cancelUrl": "https://support.google.com/googleone/answer/9004913?hl=ja",
       "plans": [{ "label": "AI Premium", "price": 2900, "default": true }]
     },
     { "name": "Notion", "category": "ai", "icon": "notion", "brandColor": "000000",
-      "cancelUrl": "https://www.notion.so/my-account",
+      "cancelUrl": "https://www.notion.com/help/cancel-your-plan",
       "plans": [
         { "label": "Plus", "price": 1650, "default": true },
         { "label": "Business", "price": 2950 }
       ]
     },
     { "name": "Canva Pro", "category": "creative", "icon": "canva", "brandColor": "00C4CC",
-      "cancelUrl": "https://www.canva.com/settings/your-account",
+      "cancelUrl": "https://www.canva.com/help/cancel-canva-subscription/",
       "plans": [{ "label": "Pro 個人", "price": 1500, "default": true }]
     },
     { "name": "Perplexity Pro", "category": "ai", "icon": "perplexity", "brandColor": "20808D",
-      "cancelUrl": "https://www.perplexity.ai/settings/account",
+      "cancelUrl": "https://www.perplexity.ai/help-center/en/articles/10352965-how-to-cancel-your-subscription",
       "plans": [{ "label": "Pro", "price": 3000, "default": true }]
     },
     { "name": "GitHub Copilot", "category": "ai", "icon": "github", "brandColor": "181717",
-      "cancelUrl": "https://github.com/settings/billing",
+      "cancelUrl": "https://docs.github.com/ja/copilot/managing-copilot/managing-your-copilot-subscription/cancelling-your-copilot-individual-subscription",
       "plans": [
         { "label": "個人", "price": 1500, "default": true },
         { "label": "Business", "price": 3000 }
       ]
     },
     { "name": "Cursor Pro", "category": "ai", "icon": "",
-      "cancelUrl": "https://www.cursor.com/settings",
+      "cancelUrl": "https://forum.cursor.com/t/how-to-cancel-cursor-subscription/",
       "plans": [{ "label": "Pro", "price": 3000, "default": true }]
     },
 
@@ -143,7 +143,7 @@
       ]
     },
     { "name": "Google One", "category": "cloud", "icon": "googleone", "brandColor": "4285F4",
-      "cancelUrl": "https://one.google.com/u/0/storage",
+      "cancelUrl": "https://support.google.com/googleone/answer/9004913?hl=ja",
       "plans": [
         { "label": "100GB", "price": 250, "default": true },
         { "label": "200GB", "price": 380 },
@@ -151,7 +151,7 @@
       ]
     },
     { "name": "Dropbox", "category": "cloud", "icon": "dropbox", "brandColor": "0061FF",
-      "cancelUrl": "https://www.dropbox.com/account/billing",
+      "cancelUrl": "https://help.dropbox.com/ja-jp/account-access/cancel-subscription",
       "plans": [
         { "label": "Plus", "price": 1500, "default": true },
         { "label": "Essentials", "price": 2400 }
@@ -159,7 +159,7 @@
     },
 
     { "name": "Kindle Unlimited", "category": "books", "icon": "amazon", "brandColor": "FF9900",
-      "cancelUrl": "https://www.amazon.co.jp/kindle-dbs/hz/subscription/membership",
+      "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=G5W82HKWUQGDZQEK",
       "plans": [{ "label": "月額", "price": 980, "default": true }]
     },
     { "name": "dマガジン", "category": "books", "icon": "",
@@ -167,7 +167,7 @@
       "plans": [{ "label": "月額", "price": 580, "default": true }]
     },
     { "name": "Audible", "category": "books", "icon": "audible", "brandColor": "F8991C",
-      "cancelUrl": "https://www.audible.co.jp/account/centerSummaryView",
+      "cancelUrl": "https://help.audible.co.jp/s/article/AC0019",
       "plans": [{ "label": "月額", "price": 1500, "default": true }]
     },
 
@@ -179,7 +179,7 @@
       ]
     },
     { "name": "NewsPicks プレミアム", "category": "news", "icon": "",
-      "cancelUrl": "https://newspicks.com/payment/settings/",
+      "cancelUrl": "https://help.newspicks.com/hc/ja/categories/360001124111",
       "plans": [{ "label": "月額", "price": 1850, "default": true }]
     },
     { "name": "SmartNews+", "category": "news", "icon": "smartnews", "brandColor": "00B5FF",
@@ -195,11 +195,11 @@
       ]
     },
     { "name": "Duolingo", "category": "learning", "icon": "duolingo", "brandColor": "58CC02",
-      "cancelUrl": "https://www.duolingo.com/settings/account",
+      "cancelUrl": "https://blog.duolingo.com/canceling-duolingo-super-or-max/",
       "plans": [{ "label": "Super", "price": 1300, "default": true }]
     },
     { "name": "Udemy", "category": "learning", "icon": "udemy", "brandColor": "A435F0",
-      "cancelUrl": "https://www.udemy.com/account-settings/",
+      "cancelUrl": "https://support.udemy.com/hc/ja/articles/229231147",
       "plans": [{ "label": "Personal Plan", "price": 1800, "default": true }]
     },
 
@@ -227,7 +227,7 @@
       ]
     },
     { "name": "Nintendo Switch Online", "category": "shopping", "icon": "nintendoswitch", "brandColor": "E60012",
-      "cancelUrl": "https://accounts.nintendo.com/login?post_login_redirect_uri=https%3A%2F%2Fec.nintendo.com%2Fmy%2Fsubscriptions",
+      "cancelUrl": "https://en-americas-support.nintendo.com/app/answers/detail/a_id/27326",
       "plans": [
         { "label": "個人", "price": 306, "default": true },
         { "label": "ファミリー", "price": 750 },
@@ -244,7 +244,7 @@
     },
 
     { "name": "Adobe Creative Cloud", "category": "creative", "icon": "adobecreativecloud", "brandColor": "DA1F26",
-      "cancelUrl": "https://account.adobe.com/plans",
+      "cancelUrl": "https://helpx.adobe.com/jp/manage-account/using/cancel-subscription.html",
       "plans": [
         { "label": "コンプリート", "price": 6480, "default": true },
         { "label": "フォトプラン", "price": 1280 }
@@ -255,7 +255,7 @@
       "plans": [{ "label": "Professional", "price": 1800, "default": true }]
     },
     { "name": "Midjourney", "category": "creative", "icon": "",
-      "cancelUrl": "https://www.midjourney.com/account/",
+      "cancelUrl": "https://docs.midjourney.com/hc/en-us/articles/30314985335821",
       "plans": [
         { "label": "Basic", "price": 1500, "default": true },
         { "label": "Standard", "price": 4500 }
@@ -274,14 +274,14 @@
       ]
     },
     { "name": "Microsoft 365", "category": "tools", "icon": "microsoft", "brandColor": "5E5E5E",
-      "cancelUrl": "https://account.microsoft.com/services/",
+      "cancelUrl": "https://support.microsoft.com/ja-jp/account-billing/c44b22df-7f0e-39bb-9c4c-65d18f3aae72",
       "plans": [
         { "label": "Personal", "price": 1490, "default": true },
         { "label": "Family", "price": 2100 }
       ]
     },
     { "name": "Google Workspace", "category": "tools", "icon": "google", "brandColor": "4285F4",
-      "cancelUrl": "https://admin.google.com/ac/billing/subscriptions",
+      "cancelUrl": "https://support.google.com/a/answer/1257646?hl=ja",
       "plans": [
         { "label": "Business Starter", "price": 1360, "default": true },
         { "label": "Business Standard", "price": 2720 }
@@ -292,14 +292,14 @@
       "plans": [{ "label": "Pro", "price": 1050, "default": true }]
     },
     { "name": "Zoom Workplace", "category": "tools", "icon": "zoom", "brandColor": "0B5CFF",
-      "cancelUrl": "https://zoom.us/billing",
+      "cancelUrl": "https://support.zoom.com/hc/ja/article?id=zm_kb&sysparm_article=KB0061233",
       "plans": [
         { "label": "Pro", "price": 2125, "default": true },
         { "label": "Business", "price": 2999 }
       ]
     },
     { "name": "1Password", "category": "tools", "icon": "1password", "brandColor": "0094F5",
-      "cancelUrl": "https://my.1password.com/billing",
+      "cancelUrl": "https://support.1password.com/manage-account/",
       "plans": [{ "label": "個人", "price": 450, "default": true }]
     }
   ]

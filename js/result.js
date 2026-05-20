@@ -21,15 +21,25 @@ async function initResult() {
   const summary = calcSummary(subs);
   const categorySummary = calcCategorySummary(subs, _categories);
 
+  // Phase 9: 履歴比較用に前回スナップショット取得＆今回保存
+  const previousSnapshot = getLatestPreviousSnapshot();
+  saveSnapshot({
+    count: summary.count,
+    monthlyTotal: summary.monthlyTotal,
+    yearlyTotal: summary.yearlyTotal,
+    candidateCount: summary.candidates.length,
+  });
+
   trackEvent('result_view', {
     sub_count: summary.count,
     monthly_total: summary.monthlyTotal,
     yearly_total: summary.yearlyTotal,
     candidate_count: summary.candidates.length,
     savings_yearly: summary.savingsYearly,
+    has_previous: !!previousSnapshot,
   });
 
-  renderResult(summary, affiliates, themes, categorySummary);
+  renderResult(summary, affiliates, themes, categorySummary, previousSnapshot);
   // renderResult後にChart.js初期化
   renderCategoryChart(categorySummary);
 }
@@ -99,7 +109,7 @@ function renderCategoryChart(categorySummary) {
   }
 }
 
-function renderResult(summary, affiliates, themes, categorySummary) {
+function renderResult(summary, affiliates, themes, categorySummary, previousSnapshot) {
   const root = document.getElementById('result-root');
   const { count, monthlyTotal, yearlyTotal, candidates, savingsMonthly, savingsYearly, scored } = summary;
 
@@ -142,6 +152,9 @@ function renderResult(summary, affiliates, themes, categorySummary) {
       </div>
       `}
 
+      <!-- 無料トライアル警告（Phase 8） -->
+      ${buildTrialAlertSection(scored)}
+
       <!-- 月額・年間合計カード -->
       <div class="grid grid-cols-2 gap-3 mb-6">
         <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 text-center">
@@ -153,6 +166,12 @@ function renderResult(summary, affiliates, themes, categorySummary) {
           <p class="text-xl font-bold text-gray-800">${formatJPY(yearlyTotal)}</p>
         </div>
       </div>
+
+      <!-- 履歴比較（Phase 9・前回スナップショットがある場合のみ） -->
+      ${buildHistoryComparisonSection(summary, previousSnapshot)}
+
+      <!-- 引き落とし日カレンダー（Phase 7・設定済みサブスクがある場合のみ） -->
+      ${buildBillingCalendarSection(scored)}
 
       <!-- カテゴリ別 円グラフ -->
       ${categorySummary && categorySummary.length > 0 ? `
@@ -370,6 +389,235 @@ function renderAffiliateCard(a) {
         </a>
       </div>
     </article>
+  `;
+}
+
+// ====== Phase 9: 履歴比較 ======
+
+function buildHistoryComparisonSection(summary, previous) {
+  if (!previous) return '';
+
+  const countDiff = summary.count - previous.count;
+  const monthlyDiff = summary.monthlyTotal - previous.monthlyTotal;
+  const yearlyDiff = summary.yearlyTotal - previous.yearlyTotal;
+
+  // 差分なし＆同件数ならスキップ
+  if (countDiff === 0 && monthlyDiff === 0) return '';
+
+  const isImproving = monthlyDiff < 0;
+  const isMoreCount = countDiff > 0;
+
+  // 経過日数
+  const prevDate = new Date(previous.date);
+  const today = new Date();
+  const daysAgo = Math.floor((today - prevDate) / (1000 * 60 * 60 * 24));
+  const daysLabel = daysAgo === 0 ? '今日' : daysAgo === 1 ? '昨日' : `${daysAgo}日前`;
+
+  return `
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xl">📈</span>
+        <h2 class="text-base font-bold text-gray-800">前回（${daysLabel}）からの変化</h2>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-emerald-50 rounded-xl p-3">
+          <p class="text-[10px] text-gray-500 mb-1">登録件数</p>
+          <p class="text-base font-bold text-gray-800">${summary.count}件</p>
+          <p class="text-[10px] font-bold ${countDiff > 0 ? 'text-orange-600' : countDiff < 0 ? 'text-emerald-600' : 'text-gray-400'} mt-0.5">
+            ${countDiff > 0 ? `+${countDiff}` : countDiff < 0 ? countDiff : '±0'}
+          </p>
+        </div>
+        <div class="${isImproving ? 'bg-emerald-50' : monthlyDiff > 0 ? 'bg-red-50' : 'bg-gray-50'} rounded-xl p-3">
+          <p class="text-[10px] text-gray-500 mb-1">月額合計</p>
+          <p class="text-base font-bold text-gray-800">${formatJPY(summary.monthlyTotal)}</p>
+          <p class="text-[10px] font-bold ${isImproving ? 'text-emerald-600' : monthlyDiff > 0 ? 'text-red-600' : 'text-gray-400'} mt-0.5">
+            ${monthlyDiff > 0 ? `+${formatJPY(monthlyDiff)}` : monthlyDiff < 0 ? formatJPY(monthlyDiff) : '±0'}
+          </p>
+        </div>
+        <div class="${yearlyDiff < 0 ? 'bg-emerald-50' : yearlyDiff > 0 ? 'bg-red-50' : 'bg-gray-50'} rounded-xl p-3">
+          <p class="text-[10px] text-gray-500 mb-1">年額換算</p>
+          <p class="text-base font-bold text-gray-800">${formatJPY(summary.yearlyTotal)}</p>
+          <p class="text-[10px] font-bold ${yearlyDiff < 0 ? 'text-emerald-600' : yearlyDiff > 0 ? 'text-red-600' : 'text-gray-400'} mt-0.5">
+            ${yearlyDiff > 0 ? `+${formatJPY(yearlyDiff)}` : yearlyDiff < 0 ? formatJPY(yearlyDiff) : '±0'}
+          </p>
+        </div>
+      </div>
+      ${isImproving ? `
+        <div class="bg-emerald-50 rounded-xl p-3 mt-3 text-center">
+          <p class="text-sm font-bold text-emerald-700">🎉 月 ${formatJPY(Math.abs(monthlyDiff))} の節約に成功！</p>
+          <p class="text-xs text-gray-600 mt-1">年間で ${formatJPY(Math.abs(yearlyDiff))} 浮く計算です</p>
+        </div>
+      ` : monthlyDiff > 0 ? `
+        <p class="text-xs text-gray-500 text-center mt-3">⚠️ サブスクが増えました。本当に必要か再確認しましょう</p>
+      ` : ''}
+    </div>
+  `;
+}
+
+// ====== Phase 8: 無料トライアル管理 ======
+
+function buildTrialAlertSection(scoredSubs) {
+  const withTrial = scoredSubs.filter((s) => s.trialEndDate);
+  if (withTrial.length === 0) return '';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 各サブスクの残り日数を計算
+  const items = withTrial.map((s) => {
+    const end = new Date(s.trialEndDate);
+    end.setHours(0, 0, 0, 0);
+    const diff = Math.floor((end - today) / (1000 * 60 * 60 * 24));
+    return { ...s, daysLeft: diff };
+  }).sort((a, b) => a.daysLeft - b.daysLeft);
+
+  // 過去のものは除外（だが期限切れ警告は表示）
+  const expired = items.filter((i) => i.daysLeft < 0);
+  const urgent = items.filter((i) => i.daysLeft >= 0 && i.daysLeft <= 7);
+  const upcoming = items.filter((i) => i.daysLeft > 7 && i.daysLeft <= 30);
+  const far = items.filter((i) => i.daysLeft > 30);
+
+  if (expired.length === 0 && urgent.length === 0 && upcoming.length === 0 && far.length === 0) return '';
+
+  return `
+    <div class="bg-gradient-to-br ${urgent.length > 0 ? 'from-red-500 to-orange-500' : 'from-blue-500 to-cyan-500'} text-white rounded-2xl p-5 mb-6 shadow-md">
+      <p class="text-xs opacity-90 mb-1">⏰ 無料トライアル管理</p>
+      <h2 class="text-base font-bold mb-3">${urgent.length > 0 ? '解約期限が近いものがあります！' : 'トライアル中のサブスク'}</h2>
+      <div class="space-y-2">
+        ${expired.map((i) => `
+          <div class="bg-white/20 rounded-lg p-3 flex items-center gap-3">
+            <span class="text-xl flex-shrink-0">⚠️</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold truncate">${escapeHtml(i.name)}</p>
+              <p class="text-[10px] opacity-80">トライアル終了済み（${Math.abs(i.daysLeft)}日前）→ 課金開始の可能性</p>
+            </div>
+            ${i.cancelUrl ? `<a href="${escapeAttr(i.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-red-50" data-sub-name="${escapeAttr(i.name)}">確認</a>` : ''}
+          </div>
+        `).join('')}
+        ${urgent.map((i) => `
+          <div class="bg-white/20 rounded-lg p-3 flex items-center gap-3">
+            <span class="text-xl flex-shrink-0">🚨</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold truncate">${escapeHtml(i.name)}</p>
+              <p class="text-[10px] opacity-80">あと${i.daysLeft === 0 ? '今日' : i.daysLeft + '日'}で課金開始（${i.trialEndDate}）・月額${formatJPY(i.price)}</p>
+            </div>
+            ${i.cancelUrl ? `<a href="${escapeAttr(i.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-red-50" data-sub-name="${escapeAttr(i.name)}">解約方法</a>` : ''}
+          </div>
+        `).join('')}
+        ${upcoming.map((i) => `
+          <div class="bg-white/15 rounded-lg p-3 flex items-center gap-3">
+            <span class="text-xl flex-shrink-0">📅</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold truncate">${escapeHtml(i.name)}</p>
+              <p class="text-[10px] opacity-80">あと${i.daysLeft}日で課金開始（${i.trialEndDate}）</p>
+            </div>
+          </div>
+        `).join('')}
+        ${far.length > 0 ? `<p class="text-xs opacity-80 text-center mt-2">他 ${far.length}件は1ヶ月以上先</p>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ====== Phase 7: 引き落とし日カレンダー ======
+
+function buildBillingCalendarSection(scoredSubs) {
+  const subsWithBilling = scoredSubs.filter((s) => s.billingDay && s.billingDay >= 1 && s.billingDay <= 31);
+  if (subsWithBilling.length === 0) return '';
+
+  // 日付ごとに集計
+  const byDay = {};
+  for (const s of subsWithBilling) {
+    const d = s.billingDay;
+    if (!byDay[d]) byDay[d] = { items: [], total: 0 };
+    byDay[d].items.push(s);
+    byDay[d].total += Number(s.price) || 0;
+  }
+
+  // 今日基準で次の引き落とし予定をハイライト
+  const today = new Date();
+  const todayDay = today.getDate();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth(); // 0-11
+  const monthLabel = `${currentYear}年${currentMonth + 1}月`;
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  // 月の1日の曜日（0=日, 1=月, ..., 6=土）
+  const firstWeekday = new Date(currentYear, currentMonth, 1).getDay();
+
+  // カレンダーセル生成
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+  const cells = [];
+  // 空白セル（前の月の余白）
+  for (let i = 0; i < firstWeekday; i++) cells.push({ blank: true });
+  // 日付セル
+  for (let d = 1; d <= daysInMonth; d++) {
+    const billing = byDay[d];
+    cells.push({
+      day: d,
+      isToday: d === todayDay,
+      billing,
+    });
+  }
+
+  // 月合計
+  const monthTotal = Object.values(byDay).reduce((sum, v) => sum + v.total, 0);
+
+  // 次回引き落とし予定（直近）
+  let nextBilling = null;
+  for (let d = todayDay; d <= daysInMonth; d++) {
+    if (byDay[d]) { nextBilling = { day: d, ...byDay[d] }; break; }
+  }
+  if (!nextBilling) {
+    // 今月以降ない → 来月1日以降の最初
+    for (let d = 1; d < todayDay; d++) {
+      if (byDay[d]) { nextBilling = { day: d, ...byDay[d], nextMonth: true }; break; }
+    }
+  }
+
+  return `
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+      <h2 class="text-base font-bold text-gray-800 mb-1">📅 引き落としカレンダー</h2>
+      <p class="text-xs text-gray-500 mb-3">${monthLabel}（${subsWithBilling.length}件設定済み・月合計 ${formatJPY(monthTotal)}）</p>
+
+      ${nextBilling ? `
+        <div class="bg-emerald-50 rounded-xl p-3 mb-4 flex items-center gap-3">
+          <div class="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-600 text-white text-sm font-bold flex items-center justify-center">${nextBilling.day}</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs text-emerald-700 font-bold">次回の引き落とし${nextBilling.nextMonth ? '（来月）' : ''}</p>
+            <p class="text-sm font-bold text-gray-800 truncate">${nextBilling.items.map((i) => escapeHtml(i.name)).join('・')}</p>
+          </div>
+          <p class="text-base font-bold text-emerald-700">${formatJPY(nextBilling.total)}</p>
+        </div>
+      ` : ''}
+
+      <div class="grid grid-cols-7 gap-1 text-center text-[10px] mb-1">
+        ${weekdays.map((w, i) => `<div class="font-bold ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-500'}">${w}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-7 gap-1">
+        ${cells.map((c) => {
+          if (c.blank) return '<div class="aspect-square"></div>';
+          const hasBilling = !!c.billing;
+          const bg = c.isToday ? 'bg-emerald-600 text-white' : hasBilling ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-gray-50 text-gray-400';
+          return `
+            <div class="aspect-square rounded-md ${bg} flex flex-col items-center justify-center p-0.5">
+              <span class="text-[10px] font-bold leading-none">${c.day}</span>
+              ${hasBilling ? `<span class="text-[8px] leading-none mt-0.5">¥${Math.round(c.billing.total / 100) / 10}k</span>` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-gray-100">
+        <p class="text-xs font-bold text-gray-700 mb-2">支払い予定一覧</p>
+        ${Object.entries(byDay).sort((a, b) => Number(a[0]) - Number(b[0])).map(([day, data]) => `
+          <div class="flex items-center gap-2 py-1.5 text-xs">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full ${Number(day) === todayDay ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700'} text-xs font-bold flex items-center justify-center">${day}</div>
+            <p class="flex-1 min-w-0 truncate text-gray-700">${data.items.map((i) => escapeHtml(i.name)).join(' / ')}</p>
+            <p class="font-bold text-gray-800 flex-shrink-0">${formatJPY(data.total)}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
   `;
 }
 

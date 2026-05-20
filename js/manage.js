@@ -63,11 +63,19 @@ async function init() {
 
 function populateCategorySelect() {
   const select = document.getElementById('sub-category');
-  if (!select) return;
-  select.innerHTML = _popular.categories
-    .map((c) => `<option value="${c.id}">${c.emoji} ${c.label}</option>`)
-    .join('');
-  select.value = 'other';
+  if (select) {
+    select.innerHTML = _popular.categories
+      .map((c) => `<option value="${c.id}">${c.emoji} ${c.label}</option>`)
+      .join('');
+    select.value = 'other';
+  }
+  // 手動入力フォームの引き落とし日セレクト初期化
+  const billingDaySelect = document.getElementById('sub-billing-day');
+  if (billingDaySelect && billingDaySelect.children.length <= 1) {
+    const opts = ['<option value="">設定しない</option>'];
+    for (let i = 1; i <= 31; i++) opts.push(`<option value="${i}">${i}日</option>`);
+    billingDaySelect.innerHTML = opts.join('');
+  }
 }
 
 function toggleManualForm() {
@@ -244,7 +252,7 @@ function renderPlanView() {
 
         <!-- 使用頻度（ここで答えてもらう） -->
         <p class="text-sm font-bold text-gray-700 mb-2">最近、使ってますか？</p>
-        <div class="grid grid-cols-1 gap-2 mb-3">
+        <div class="grid grid-cols-1 gap-2 mb-5">
           ${[
             { value: 'often', emoji: '😊', label: 'よく使ってる（週1回以上）' },
             { value: 'sometimes', emoji: '🤔', label: 'たまに使う（月に数回）' },
@@ -256,6 +264,26 @@ function renderPlanView() {
             </button>
           `).join('')}
         </div>
+
+        <!-- 引き落とし日（任意） -->
+        <details class="bg-gray-50 rounded-xl p-3 mb-3">
+          <summary class="text-sm font-bold text-gray-700 cursor-pointer">📅 引き落とし日・トライアル期限を設定（任意）</summary>
+          <div class="mt-3 space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">毎月の引き落とし日</label>
+              <select id="picker-billing-day" class="w-full p-2 bg-white border-2 border-gray-200 rounded-lg text-sm">
+                <option value="">設定しない</option>
+                ${Array.from({ length: 31 }, (_, i) => i + 1).map((d) => `<option value="${d}" ${_pickerState.billingDay == d ? 'selected' : ''}>${d}日</option>`).join('')}
+              </select>
+              <p class="text-[10px] text-gray-500 mt-1">設定すると結果ページにカレンダーで表示されます</p>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">無料トライアル終了日</label>
+              <input id="picker-trial-end" type="date" value="${_pickerState.trialEndDate || ''}" class="w-full p-2 bg-white border-2 border-gray-200 rounded-lg text-sm">
+              <p class="text-[10px] text-gray-500 mt-1">設定すると解約忘れ防止アラートが出ます</p>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- 追加ボタン -->
@@ -371,9 +399,15 @@ function confirmPickerAdd() {
   const usage = _pickerState.usage;
   if (!usage) return;
 
+  // 引き落とし日・トライアル終了日（任意）
+  const billingDaySelect = document.getElementById('picker-billing-day');
+  const trialEndInput = document.getElementById('picker-trial-end');
+  const billingDay = billingDaySelect && billingDaySelect.value ? Number(billingDaySelect.value) : null;
+  const trialEndDate = trialEndInput && trialEndInput.value ? trialEndInput.value : null;
+
   const fullName = sub.plans.length > 1 ? `${sub.name}（${plan.label}）` : sub.name;
-  addSubscription({ name: fullName, price, usage, category: sub.category, cancelUrl: sub.cancelUrl || null });
-  trackEvent('picker_subscription_add', { name: sub.name, plan: plan.label, price, usage });
+  addSubscription({ name: fullName, price, usage, category: sub.category, cancelUrl: sub.cancelUrl || null, billingDay, trialEndDate });
+  trackEvent('picker_subscription_add', { name: sub.name, plan: plan.label, price, usage, has_billing_day: !!billingDay, has_trial: !!trialEndDate });
 
   closePicker();
   updateDacchoooMessage();
@@ -395,12 +429,14 @@ function onSubmit(e) {
   const price = Number(formData.get('price') || 0);
   const usage = formData.get('usage');
   const category = formData.get('category') || 'other';
+  const billingDay = formData.get('billingDay') ? Number(formData.get('billingDay')) : null;
+  const trialEndDate = formData.get('trialEndDate') || null;
 
   if (!name || !usage) return;
   if (price < 0 || price > 100000) return;
 
-  addSubscription({ name, price, usage, category });
-  trackEvent('subscription_add', { price, usage, category, source: 'manual' });
+  addSubscription({ name, price, usage, category, billingDay, trialEndDate });
+  trackEvent('subscription_add', { price, usage, category, source: 'manual', has_billing_day: !!billingDay, has_trial: !!trialEndDate });
 
   form.reset();
   document.getElementById('sub-category').value = 'other';
