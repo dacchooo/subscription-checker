@@ -65,8 +65,9 @@ function addSubscription(sub) {
     name: sub.name,
     price: Number(sub.price) || 0,
     usage: sub.usage, // 'often' | 'sometimes' | 'unused'
-    category: sub.category || 'other', // カテゴリID（'video' / 'music' / etc）
-    detail: sub.detail || null, // Phase 3 追加診断結果（後で使う）
+    category: sub.category || 'other', // カテゴリID
+    cancelUrl: sub.cancelUrl || null, // Phase 5-D: 解約ページURL
+    detail: sub.detail || null, // Phase 3 追加診断結果
     createdAt: new Date().toISOString(),
   };
   subs.push(newSub);

@@ -104,6 +104,24 @@
           <h2 class="text-base font-bold text-gray-800">📦 登録済み（<span id="sub-count">0</span>件）</h2>
           <button id="clear-all-btn" class="text-xs text-red-600 hover:text-red-700 underline hidden">全部消す</button>
         </div>
+
+        <!-- 並び替え＋表示モード切替（登録1件以上の時のみ表示） -->
+        <div id="list-controls" class="hidden bg-white rounded-2xl border border-emerald-100 p-3 mb-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold text-gray-700">並び替え:</span>
+            <button data-sort="score" class="sort-btn text-xs px-2 py-1 rounded-full border-2 transition">🚨 解約候補度</button>
+            <button data-sort="price-desc" class="sort-btn text-xs px-2 py-1 rounded-full border-2 transition">💰 月額高い順</button>
+            <button data-sort="added" class="sort-btn text-xs px-2 py-1 rounded-full border-2 transition">🆕 最近追加</button>
+            <button data-sort="name" class="sort-btn text-xs px-2 py-1 rounded-full border-2 transition">📛 名前順</button>
+            <button data-sort="category" class="sort-btn text-xs px-2 py-1 rounded-full border-2 transition">🗂 カテゴリ</button>
+          </div>
+          <div class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
+            <span class="text-xs font-bold text-gray-700">表示:</span>
+            <button data-mode="normal" class="mode-btn text-xs px-2 py-1 rounded-full border-2 transition">📋 通常</button>
+            <button data-mode="compact" class="mode-btn text-xs px-2 py-1 rounded-full border-2 transition">≡ コンパクト</button>
+          </div>
+        </div>
+
         <div id="sub-list" class="space-y-2">
           <!-- JSで動的に挿入 -->
         </div>
@@ -125,7 +143,7 @@
       </p>
     </div>
   </main>
-  <script src="js/app.js?v=3"></script>
-  <script src="js/manage.js?v=3"></script>
+  <script src="js/app.js?v=4"></script>
+  <script src="js/manage.js?v=4"></script>
 </body>
 </html>

@@ -3,6 +3,25 @@
 let _popular = { categories: [], subscriptions: [] };
 let _pickerState = { open: false, view: 'services', categoryFilter: null, query: '', selectedSub: null };
 
+// 並び替え・表示モードのlocalStorage保存キー
+const LIST_PREF_KEY = 'subsk_kanri_list_pref';
+let _listPref = { sort: 'score', mode: 'normal' };
+
+function loadListPref() {
+  try {
+    const raw = localStorage.getItem(LIST_PREF_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p.sort) _listPref.sort = p.sort;
+      if (p.mode) _listPref.mode = p.mode;
+    }
+  } catch (e) {}
+}
+
+function saveListPref() {
+  try { localStorage.setItem(LIST_PREF_KEY, JSON.stringify(_listPref)); } catch (e) {}
+}
+
 async function init() {
   const form = document.getElementById('sub-form');
   const clearBtn = document.getElementById('clear-all-btn');
@@ -10,6 +29,7 @@ async function init() {
   const openManualBtn = document.getElementById('open-manual-btn');
   const closeManualBtn = document.getElementById('close-manual-btn');
 
+  loadListPref();
   _popular = await loadPopularSubscriptions();
   populateCategorySelect();
 
@@ -18,6 +38,24 @@ async function init() {
   openPickerBtn.addEventListener('click', openPicker);
   openManualBtn.addEventListener('click', toggleManualForm);
   closeManualBtn.addEventListener('click', toggleManualForm);
+
+  // 並び替え・表示モードボタン
+  document.querySelectorAll('.sort-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      _listPref.sort = btn.dataset.sort;
+      saveListPref();
+      renderList();
+      trackEvent('list_sort_change', { sort: _listPref.sort });
+    });
+  });
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      _listPref.mode = btn.dataset.mode;
+      saveListPref();
+      renderList();
+      trackEvent('list_mode_change', { mode: _listPref.mode });
+    });
+  });
 
   renderList();
   trackEvent('checker_open', { sub_count: loadSubscriptions().length });
@@ -334,7 +372,7 @@ function confirmPickerAdd() {
   if (!usage) return;
 
   const fullName = sub.plans.length > 1 ? `${sub.name}（${plan.label}）` : sub.name;
-  addSubscription({ name: fullName, price, usage, category: sub.category });
+  addSubscription({ name: fullName, price, usage, category: sub.category, cancelUrl: sub.cancelUrl || null });
   trackEvent('picker_subscription_add', { name: sub.name, plan: plan.label, price, usage });
 
   closePicker();
@@ -400,6 +438,7 @@ function renderList() {
   const count = document.getElementById('sub-count');
   const clearBtn = document.getElementById('clear-all-btn');
   const resultBottom = document.getElementById('result-cta-bottom');
+  const listControls = document.getElementById('list-controls');
 
   count.textContent = subs.length;
 
@@ -408,27 +447,75 @@ function renderList() {
     empty.classList.remove('hidden');
     clearBtn.classList.add('hidden');
     resultBottom.classList.add('hidden');
+    listControls?.classList.add('hidden');
     return;
   }
 
   empty.classList.add('hidden');
   clearBtn.classList.remove('hidden');
   resultBottom.classList.remove('hidden');
+  listControls?.classList.remove('hidden');
 
+  // ボタンの選択状態を反映
+  document.querySelectorAll('.sort-btn').forEach((btn) => {
+    if (btn.dataset.sort === _listPref.sort) {
+      btn.className = 'sort-btn text-xs px-2 py-1 rounded-full border-2 bg-emerald-600 text-white border-emerald-600 transition';
+    } else {
+      btn.className = 'sort-btn text-xs px-2 py-1 rounded-full border-2 bg-white text-gray-700 border-emerald-200 transition';
+    }
+  });
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    if (btn.dataset.mode === _listPref.mode) {
+      btn.className = 'mode-btn text-xs px-2 py-1 rounded-full border-2 bg-emerald-600 text-white border-emerald-600 transition';
+    } else {
+      btn.className = 'mode-btn text-xs px-2 py-1 rounded-full border-2 bg-white text-gray-700 border-emerald-200 transition';
+    }
+  });
+
+  // 並び替え
+  const sorted = sortSubscriptions(subs, _listPref.sort);
   const monthlyTotal = subs.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
 
   list.innerHTML = `
     <div class="bg-emerald-600 text-white rounded-2xl p-4 mb-3 text-center">
       <p class="text-xs opacity-90 mb-1">現時点の月額合計</p>
       <p class="text-3xl font-bold">${formatJPY(monthlyTotal)}</p>
-      <p class="text-xs opacity-90 mt-1">年間 ${formatJPY(monthlyTotal * 12)}</p>
+      <p class="text-xs opacity-90 mt-1">年間 ${formatJPY(monthlyTotal * 12)} ・ 1日あたり ${formatJPY(Math.round(monthlyTotal * 12 / 365))}</p>
     </div>
-    ${subs.map(renderSubCard).join('')}
+    ${sorted.map((sub) => _listPref.mode === 'compact' ? renderSubCardCompact(sub) : renderSubCard(sub)).join('')}
   `;
 
   list.querySelectorAll('[data-delete-id]').forEach((btn) => {
-    btn.addEventListener('click', () => onDelete(btn.dataset.deleteId));
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onDelete(btn.dataset.deleteId);
+    });
   });
+
+  // 解約リンクのクリック計測
+  list.querySelectorAll('.cancel-link').forEach((a) => {
+    a.addEventListener('click', () => {
+      trackEvent('cancel_link_click', { sub_name: a.dataset.subName, from: 'app_list' });
+    });
+  });
+}
+
+function sortSubscriptions(subs, sortBy) {
+  const arr = [...subs];
+  switch (sortBy) {
+    case 'score':
+      return arr.sort((a, b) => calcScore(b) - calcScore(a));
+    case 'price-desc':
+      return arr.sort((a, b) => (b.price || 0) - (a.price || 0));
+    case 'added':
+      return arr.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    case 'name':
+      return arr.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ja'));
+    case 'category':
+      return arr.sort((a, b) => (a.category || 'z').localeCompare(b.category || 'z'));
+    default:
+      return arr;
+  }
 }
 
 function renderSubCard(sub) {
@@ -439,19 +526,49 @@ function renderSubCard(sub) {
   };
   const u = usageMap[sub.usage] || usageMap.often;
   const cat = findCategoryById(_popular.categories, sub.category);
+  const dailyCost = Math.round((sub.price * 12) / 365);
 
   return `
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 flex items-center gap-3">
-      <span class="text-2xl flex-shrink-0">${u.emoji}</span>
-      <div class="flex-1 min-w-0">
-        <p class="font-bold text-gray-800 truncate">${escapeHtml(sub.name)}</p>
-        <p class="text-xs ${u.color}">${u.label} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl flex-shrink-0">${u.emoji}</span>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-gray-800 truncate">${escapeHtml(sub.name)}</p>
+          <p class="text-xs ${u.color}">${u.label} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
+          <p class="text-[10px] text-gray-400">1日あたり ${formatJPY(dailyCost)}</p>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="font-bold text-gray-800">${formatJPY(sub.price)}</p>
+          <p class="text-xs text-gray-400">月額</p>
+        </div>
+        <button data-delete-id="${sub.id}" aria-label="削除" class="text-gray-300 hover:text-red-500 text-xl flex-shrink-0 px-1">×</button>
       </div>
-      <div class="text-right flex-shrink-0">
-        <p class="font-bold text-gray-800">${formatJPY(sub.price)}</p>
-        <p class="text-xs text-gray-400">月額</p>
-      </div>
-      <button data-delete-id="${sub.id}" aria-label="削除" class="text-gray-300 hover:text-red-500 text-xl flex-shrink-0 px-1">×</button>
+      ${sub.cancelUrl ? `
+        <a href="${escapeAttr(sub.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link block mt-2 pt-2 border-t border-gray-100 text-xs text-red-600 hover:text-red-700 font-bold text-center" data-sub-name="${escapeAttr(sub.name)}">
+          🚫 解約ページを開く →
+        </a>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderSubCardCompact(sub) {
+  const usageMap = {
+    often: { emoji: '😊', color: 'text-emerald-700' },
+    sometimes: { emoji: '🤔', color: 'text-yellow-700' },
+    unused: { emoji: '😴', color: 'text-red-600' },
+  };
+  const u = usageMap[sub.usage] || usageMap.often;
+
+  return `
+    <div class="bg-white rounded-xl p-2.5 shadow-sm border border-emerald-100 flex items-center gap-2 text-sm">
+      <span class="text-base flex-shrink-0">${u.emoji}</span>
+      <p class="flex-1 min-w-0 font-bold text-gray-800 truncate">${escapeHtml(sub.name)}</p>
+      <p class="font-bold text-gray-800 flex-shrink-0">${formatJPY(sub.price)}</p>
+      ${sub.cancelUrl ? `
+        <a href="${escapeAttr(sub.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link text-red-500 hover:text-red-600 text-base flex-shrink-0" title="解約ページ" data-sub-name="${escapeAttr(sub.name)}">🚫</a>
+      ` : ''}
+      <button data-delete-id="${sub.id}" aria-label="削除" class="text-gray-300 hover:text-red-500 text-lg flex-shrink-0 px-1 leading-none">×</button>
     </div>
   `;
 }

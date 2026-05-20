@@ -124,16 +124,21 @@ function renderResult(summary, affiliates, categorySummary) {
 
       <!-- 節約見込みカード（候補がある場合） -->
       ${candidates.length > 0 ? `
-      <div class="bg-gradient-to-br from-red-500 to-orange-500 text-white rounded-2xl p-6 mb-6 shadow-md text-center">
+      <div class="bg-gradient-to-br from-red-500 to-orange-500 text-white rounded-2xl p-6 mb-4 shadow-md text-center">
         <p class="text-xs opacity-90 mb-1">解約候補（★4以上）をすべて解約した場合</p>
         <p class="text-xs opacity-90 mb-3">節約見込み額</p>
         <p class="text-4xl md:text-5xl font-bold mb-1">${formatJPY(savingsYearly)}<span class="text-base font-normal">/年</span></p>
         <p class="text-sm opacity-90">月額 ${formatJPY(savingsMonthly)} の削減</p>
+        <div class="mt-3 pt-3 border-t border-white/30 text-xs opacity-90 space-y-0.5">
+          ${buildSavingsVisuals(savingsYearly)}
+        </div>
       </div>
+      ${buildAchievementBadges(summary)}
       ` : `
       <div class="bg-emerald-600 text-white rounded-2xl p-6 mb-6 shadow-md text-center">
         <p class="text-sm mb-2">解約候補は見つかりませんでした 👏</p>
         <p class="text-xs opacity-90">登録したサブスクはどれもしっかり活用できているようです。</p>
+        ${buildAchievementBadges(summary)}
       </div>
       `}
 
@@ -216,7 +221,7 @@ function renderResult(summary, affiliates, categorySummary) {
       <a href="https://www.instagram.com/dacchooo_money/" id="insta-cta" target="_blank" rel="noopener" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full transition">
         だっちょのインスタを見る
       </a>
-      <p class="text-xs text-gray-400 text-center mt-8 leading-relaxed">※ このページ内のリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。掲載情報は目安であり、最新の内容は各公式サイトでご確認ください。</p>
+      <p class="text-xs text-gray-400 text-center mt-8 leading-relaxed">※ このページ内のリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。掲載情報・解約ページURLは目安であり、最新の内容は各公式サイトでご確認ください。サービスのロゴ・名称は各社の商標です。</p>
       <p class="text-xs text-gray-500 text-center mt-3 space-x-3">
         <a href="about.html" class="hover:text-emerald-700 underline">運営者情報</a>
         <a href="privacy.html" class="hover:text-emerald-700 underline">プライバシーポリシー</a>
@@ -229,6 +234,13 @@ function renderResult(summary, affiliates, categorySummary) {
   // 詳細チェックボタン（Phase 3）
   root.querySelectorAll('.detail-check-btn').forEach((btn) => {
     btn.addEventListener('click', () => openDetailCheckModal(btn.dataset.detailId));
+  });
+
+  // 解約リンク（Phase 5-D）
+  root.querySelectorAll('.cancel-link').forEach((a) => {
+    a.addEventListener('click', () => {
+      trackEvent('cancel_link_click', { sub_name: a.dataset.subName, from: 'result_page' });
+    });
   });
 
   // クリック計測
@@ -305,14 +317,30 @@ function renderSubRanking(sub, idx) {
           <p class="font-bold text-gray-800 text-sm truncate">${escapeHtml(sub.name)}</p>
           <span class="text-xs ${colorClass} border px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${label.emoji} ${label.label}</span>
         </div>
-        <p class="text-xs text-gray-600">月額 ${formatJPY(sub.price)} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
+        <p class="text-xs text-gray-600">月額 ${formatJPY(sub.price)} ・ 1日 ${formatJPY(Math.round((sub.price * 12) / 365))} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
         <p class="text-yellow-500 text-sm mt-1">${starHTML}</p>
-        <button data-detail-id="${sub.id}" class="detail-check-btn mt-2 text-xs font-bold text-emerald-700 hover:text-emerald-800 underline">
-          ${hasDetail ? '✓ 詳しくチェック済み（再診断）' : '🔍 もっと詳しくチェック（3タップ）'}
-        </button>
+        <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 items-center">
+          <button data-detail-id="${sub.id}" class="detail-check-btn text-xs font-bold text-emerald-700 hover:text-emerald-800 underline">
+            ${hasDetail ? '✓ 詳しくチェック済み（再診断）' : '🔍 もっと詳しくチェック'}
+          </button>
+          ${sub.cancelUrl ? `
+            <a href="${escapeAttr(sub.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link text-xs font-bold text-red-600 hover:text-red-700 underline" data-sub-name="${escapeAttr(sub.name)}">
+              🚫 解約ページを開く
+            </a>
+          ` : ''}
+        </div>
       </div>
     </div>
   `;
+}
+
+function escapeAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function selectAffiliates(summary, affiliates) {
@@ -420,6 +448,44 @@ async function captureAndShare() {
     btn.textContent = originalText;
     btn.disabled = false;
   }
+}
+
+// ====== Phase 5-C: コスト換算＋達成バッジ ======
+
+function buildSavingsVisuals(savingsYearly) {
+  if (!savingsYearly || savingsYearly <= 0) return '';
+  const cafe = Math.round(savingsYearly / 500); // カフェ1杯500円換算
+  const movie = Math.round(savingsYearly / 1800); // 映画1800円換算
+  const dailyCost = Math.round(savingsYearly / 365);
+  const lines = [];
+  lines.push(`☕ カフェ <strong>${cafe}杯</strong> 分 ／ 🎬 映画 <strong>${movie}本</strong> 分`);
+  lines.push(`1日あたり <strong>${formatJPY(dailyCost)}</strong> の節約に相当`);
+  return lines.join('<br>');
+}
+
+function buildAchievementBadges(summary) {
+  const badges = [];
+  const { count, candidates, savingsYearly, monthlyTotal } = summary;
+
+  // バッジ条件
+  if (count >= 10) badges.push({ emoji: '🏆', label: 'サブスク10件達成', color: 'bg-yellow-500' });
+  else if (count >= 5) badges.push({ emoji: '📊', label: '5件登録達成', color: 'bg-emerald-600' });
+  if (candidates.length >= 5) badges.push({ emoji: '🎯', label: '解約候補5件発見', color: 'bg-red-500' });
+  else if (candidates.length >= 3) badges.push({ emoji: '🔍', label: '解約候補3件発見', color: 'bg-orange-500' });
+  if (savingsYearly >= 50000) badges.push({ emoji: '💎', label: '年間5万円節約見込み', color: 'bg-purple-600' });
+  else if (savingsYearly >= 20000) badges.push({ emoji: '💰', label: '年間2万円節約見込み', color: 'bg-emerald-500' });
+  if (candidates.length === 0 && count >= 3) badges.push({ emoji: '✨', label: '健全な家計マスター', color: 'bg-emerald-500' });
+  if (monthlyTotal >= 10000) badges.push({ emoji: '👀', label: '月1万円超え（要注意）', color: 'bg-amber-500' });
+
+  if (badges.length === 0) return '';
+
+  return `
+    <div class="flex flex-wrap gap-2 justify-center mt-4 ${candidates.length > 0 ? '' : 'pt-3 border-t border-white/30'}">
+      ${badges.map((b) => `
+        <span class="${b.color} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">${b.emoji} ${b.label}</span>
+      `).join('')}
+    </div>
+  `;
 }
 
 function escapeHtml(str) {
