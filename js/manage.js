@@ -184,14 +184,34 @@ function renderServiceTile(sub) {
 }
 
 function renderServiceLogo(sub) {
+  const name = escapeAttr(sub.name);
+
+  // 1段目：Google Favicons API（公式ロゴ・カラー）
+  if (sub.brandDomain) {
+    const googleUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(sub.brandDomain)}&sz=128`;
+    // フォールバック：Simple Icons → 絵文字
+    const simpleIconsUrl = sub.icon
+      ? `https://cdn.simpleicons.org/${sub.icon}${sub.brandColor ? '/' + sub.brandColor : ''}`
+      : '';
+    const catEmoji = findCategoryById(_popular.categories, sub.category).emoji;
+    // onerror で多段フォールバック
+    const errorHandler = simpleIconsUrl
+      ? `if(this.dataset.f!=='1'){this.dataset.f='1';this.src='${simpleIconsUrl}';}else{this.outerHTML='<span class=\\'text-2xl\\'>${catEmoji}</span>';}`
+      : `this.outerHTML='<span class=\\'text-2xl\\'>${catEmoji}</span>';`;
+    return `<img src="${googleUrl}" alt="${name}" class="w-8 h-8 object-contain" onerror="${errorHandler}">`;
+  }
+
+  // 2段目：Simple Icons（brandDomain なし＆icon ありの場合）
   if (sub.icon) {
     const color = sub.brandColor ? sub.brandColor : null;
     const url = color
       ? `https://cdn.simpleicons.org/${sub.icon}/${color}`
       : `https://cdn.simpleicons.org/${sub.icon}`;
-    return `<img src="${url}" alt="${escapeAttr(sub.name)}" class="w-8 h-8 object-contain" onerror="this.outerHTML='<span class=\\'text-xl\\'>📦</span>'">`;
+    const catEmoji = findCategoryById(_popular.categories, sub.category).emoji;
+    return `<img src="${url}" alt="${name}" class="w-8 h-8 object-contain" onerror="this.outerHTML='<span class=\\'text-2xl\\'>${catEmoji}</span>'">`;
   }
-  // アイコン未設定なら、カテゴリ絵文字でフォールバック
+
+  // 3段目：カテゴリ絵文字
   const cat = findCategoryById(_popular.categories, sub.category);
   return `<span class="text-2xl">${cat.emoji}</span>`;
 }

@@ -4,303 +4,928 @@
   "_priceDisclaimer": "金額は公式の標準プラン参考値。家族プラン・キャンペーン・年払い等で実額は変わります。",
   "_cancelUrlDisclaimer": "解約ページURLは公式の最新URL・仕様と異なる場合があります。実際の解約は必ず公式サイト・アプリで手続きしてください。",
   "categories": [
-    { "id": "video", "label": "動画配信", "emoji": "🎬", "color": "#ef4444" },
-    { "id": "music", "label": "音楽", "emoji": "🎵", "color": "#f59e0b" },
-    { "id": "ai", "label": "AI・効率化", "emoji": "🤖", "color": "#3b82f6" },
-    { "id": "cloud", "label": "クラウド・ストレージ", "emoji": "☁️", "color": "#06b6d4" },
-    { "id": "books", "label": "電子書籍・雑誌", "emoji": "📚", "color": "#8b5cf6" },
-    { "id": "news", "label": "ニュース・メディア", "emoji": "📰", "color": "#64748b" },
-    { "id": "learning", "label": "学習・自己投資", "emoji": "🎓", "color": "#10b981" },
-    { "id": "fitness", "label": "ジム・フィットネス", "emoji": "💪", "color": "#84cc16" },
-    { "id": "shopping", "label": "ショッピング・特典", "emoji": "🛒", "color": "#ec4899" },
-    { "id": "creative", "label": "クリエイティブ", "emoji": "🎨", "color": "#a855f7" },
-    { "id": "tools", "label": "ツール・業務", "emoji": "🛠️", "color": "#0ea5e9" },
-    { "id": "other", "label": "その他", "emoji": "📦", "color": "#94a3b8" }
+    {
+      "id": "video",
+      "label": "動画配信",
+      "emoji": "🎬",
+      "color": "#ef4444"
+    },
+    {
+      "id": "music",
+      "label": "音楽",
+      "emoji": "🎵",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "ai",
+      "label": "AI・効率化",
+      "emoji": "🤖",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "cloud",
+      "label": "クラウド・ストレージ",
+      "emoji": "☁️",
+      "color": "#06b6d4"
+    },
+    {
+      "id": "books",
+      "label": "電子書籍・雑誌",
+      "emoji": "📚",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "news",
+      "label": "ニュース・メディア",
+      "emoji": "📰",
+      "color": "#64748b"
+    },
+    {
+      "id": "learning",
+      "label": "学習・自己投資",
+      "emoji": "🎓",
+      "color": "#10b981"
+    },
+    {
+      "id": "fitness",
+      "label": "ジム・フィットネス",
+      "emoji": "💪",
+      "color": "#84cc16"
+    },
+    {
+      "id": "shopping",
+      "label": "ショッピング・特典",
+      "emoji": "🛒",
+      "color": "#ec4899"
+    },
+    {
+      "id": "creative",
+      "label": "クリエイティブ",
+      "emoji": "🎨",
+      "color": "#a855f7"
+    },
+    {
+      "id": "tools",
+      "label": "ツール・業務",
+      "emoji": "🛠️",
+      "color": "#0ea5e9"
+    },
+    {
+      "id": "other",
+      "label": "その他",
+      "emoji": "📦",
+      "color": "#94a3b8"
+    }
   ],
   "subscriptions": [
-    { "name": "Netflix", "category": "video", "icon": "netflix", "brandColor": "E50914",
+    {
+      "name": "Netflix",
+      "category": "video",
+      "icon": "netflix",
+      "brandColor": "E50914",
       "cancelUrl": "https://help.netflix.com/ja/node/407",
       "plans": [
-        { "label": "広告つき", "price": 890 },
-        { "label": "スタンダード", "price": 1590, "default": true },
-        { "label": "プレミアム", "price": 2290 },
-        { "label": "ベーシック（旧プラン）", "price": 1190 }
-      ]
+        {
+          "label": "広告つき",
+          "price": 890
+        },
+        {
+          "label": "スタンダード",
+          "price": 1590,
+          "default": true
+        },
+        {
+          "label": "プレミアム",
+          "price": 2290
+        },
+        {
+          "label": "ベーシック（旧プラン）",
+          "price": 1190
+        }
+      ],
+      "brandDomain": "netflix.com"
     },
-    { "name": "Amazon Prime Video", "category": "video", "icon": "primevideo", "brandColor": "00A8E1",
+    {
+      "name": "Amazon Prime Video",
+      "category": "video",
+      "icon": "primevideo",
+      "brandColor": "00A8E1",
       "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=GH9PE4HPSCNBNRX9",
-      "plans": [{ "label": "月額", "price": 600, "default": true }, { "label": "年額/月割", "price": 492 }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 600,
+          "default": true
+        },
+        {
+          "label": "年額/月割",
+          "price": 492
+        }
+      ],
+      "brandDomain": "amazon.co.jp"
     },
-    { "name": "Disney+", "category": "video", "icon": "disneyplus", "brandColor": "113CCF",
+    {
+      "name": "Disney+",
+      "category": "video",
+      "icon": "disneyplus",
+      "brandColor": "113CCF",
       "cancelUrl": "https://help.disneyplus.com/ja-JP?contentId=Sg2tNc4uKZRz",
       "plans": [
-        { "label": "スタンダード", "price": 990, "default": true },
-        { "label": "プレミアム", "price": 1320 }
-      ]
+        {
+          "label": "スタンダード",
+          "price": 990,
+          "default": true
+        },
+        {
+          "label": "プレミアム",
+          "price": 1320
+        }
+      ],
+      "brandDomain": "disneyplus.com"
     },
-    { "name": "Hulu", "category": "video", "icon": "hulu", "brandColor": "1CE783",
+    {
+      "name": "Hulu",
+      "category": "video",
+      "icon": "hulu",
+      "brandColor": "1CE783",
       "cancelUrl": "https://help.happyon.jp/article/categories/cancel",
-      "plans": [{ "label": "月額", "price": 1026, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 1026,
+          "default": true
+        }
+      ],
+      "brandDomain": "happyon.jp"
     },
-    { "name": "U-NEXT", "category": "video", "icon": "",
+    {
+      "name": "U-NEXT",
+      "category": "video",
+      "icon": "",
       "cancelUrl": "https://help.unext.jp/guide/cancellation",
-      "plans": [{ "label": "月額", "price": 2189, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 2189,
+          "default": true
+        }
+      ],
+      "brandDomain": "unext.jp"
     },
-    { "name": "DAZN", "category": "video", "icon": "dazn", "brandColor": "F8F500",
+    {
+      "name": "DAZN",
+      "category": "video",
+      "icon": "dazn",
+      "brandColor": "F8F500",
       "cancelUrl": "https://www.dazn.com/ja-JP/help/articles/cancel-dazn-subscription",
       "plans": [
-        { "label": "Global", "price": 1925 },
-        { "label": "Standard", "price": 4200, "default": true }
-      ]
+        {
+          "label": "Global",
+          "price": 1925
+        },
+        {
+          "label": "Standard",
+          "price": 4200,
+          "default": true
+        }
+      ],
+      "brandDomain": "dazn.com"
     },
-    { "name": "ABEMAプレミアム", "category": "video", "icon": "",
+    {
+      "name": "ABEMAプレミアム",
+      "category": "video",
+      "icon": "",
       "cancelUrl": "https://abema.tv/about/premium#cancel",
-      "plans": [{ "label": "月額", "price": 1080, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 1080,
+          "default": true
+        }
+      ],
+      "brandDomain": "abema.tv"
     },
-    { "name": "Apple TV+", "category": "video", "icon": "appletv", "brandColor": "000000",
+    {
+      "name": "Apple TV+",
+      "category": "video",
+      "icon": "appletv",
+      "brandColor": "000000",
       "cancelUrl": "https://support.apple.com/ja-jp/HT202039",
-      "plans": [{ "label": "月額", "price": 900, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 900,
+          "default": true
+        }
+      ],
+      "brandDomain": "apple.com"
     },
-    { "name": "YouTube Premium", "category": "video", "icon": "youtube", "brandColor": "FF0000",
+    {
+      "name": "YouTube Premium",
+      "category": "video",
+      "icon": "youtube",
+      "brandColor": "FF0000",
       "cancelUrl": "https://support.google.com/youtube/answer/6308762?hl=ja",
       "plans": [
-        { "label": "個人", "price": 1280, "default": true },
-        { "label": "ファミリー", "price": 2280 },
-        { "label": "学生", "price": 780 }
-      ]
+        {
+          "label": "個人",
+          "price": 1280,
+          "default": true
+        },
+        {
+          "label": "ファミリー",
+          "price": 2280
+        },
+        {
+          "label": "学生",
+          "price": 780
+        }
+      ],
+      "brandDomain": "youtube.com"
     },
-
-    { "name": "Spotify", "category": "music", "icon": "spotify", "brandColor": "1DB954",
+    {
+      "name": "Spotify",
+      "category": "music",
+      "icon": "spotify",
+      "brandColor": "1DB954",
       "cancelUrl": "https://support.spotify.com/jp/article/cancel-premium/",
       "plans": [
-        { "label": "Premium 個人", "price": 980, "default": true },
-        { "label": "Duo", "price": 1280 },
-        { "label": "ファミリー", "price": 1580 },
-        { "label": "学生", "price": 480 }
-      ]
+        {
+          "label": "Premium 個人",
+          "price": 980,
+          "default": true
+        },
+        {
+          "label": "Duo",
+          "price": 1280
+        },
+        {
+          "label": "ファミリー",
+          "price": 1580
+        },
+        {
+          "label": "学生",
+          "price": 480
+        }
+      ],
+      "brandDomain": "spotify.com"
     },
-    { "name": "Apple Music", "category": "music", "icon": "applemusic", "brandColor": "FA243C",
+    {
+      "name": "Apple Music",
+      "category": "music",
+      "icon": "applemusic",
+      "brandColor": "FA243C",
       "cancelUrl": "https://support.apple.com/ja-jp/HT202039",
       "plans": [
-        { "label": "個人", "price": 1080, "default": true },
-        { "label": "ファミリー", "price": 1680 },
-        { "label": "学生", "price": 580 }
-      ]
+        {
+          "label": "個人",
+          "price": 1080,
+          "default": true
+        },
+        {
+          "label": "ファミリー",
+          "price": 1680
+        },
+        {
+          "label": "学生",
+          "price": 580
+        }
+      ],
+      "brandDomain": "music.apple.com"
     },
-    { "name": "Amazon Music Unlimited", "category": "music", "icon": "amazonmusic", "brandColor": "232F3E",
+    {
+      "name": "Amazon Music Unlimited",
+      "category": "music",
+      "icon": "amazonmusic",
+      "brandColor": "232F3E",
       "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=GZS4VJF7XXKFKHGW",
       "plans": [
-        { "label": "個人", "price": 1080, "default": true },
-        { "label": "Prime会員", "price": 980 }
-      ]
+        {
+          "label": "個人",
+          "price": 1080,
+          "default": true
+        },
+        {
+          "label": "Prime会員",
+          "price": 980
+        }
+      ],
+      "brandDomain": "music.amazon.co.jp"
     },
-
-    { "name": "ChatGPT Plus", "category": "ai", "icon": "openai", "brandColor": "412991",
+    {
+      "name": "ChatGPT Plus",
+      "category": "ai",
+      "icon": "openai",
+      "brandColor": "412991",
       "cancelUrl": "https://help.openai.com/en/articles/8554471",
-      "plans": [{ "label": "Plus", "price": 3000, "default": true }, { "label": "Pro", "price": 30000 }]
+      "plans": [
+        {
+          "label": "Plus",
+          "price": 3000,
+          "default": true
+        },
+        {
+          "label": "Pro",
+          "price": 30000
+        }
+      ],
+      "brandDomain": "openai.com"
     },
-    { "name": "Claude Pro", "category": "ai", "icon": "anthropic", "brandColor": "D97757",
+    {
+      "name": "Claude Pro",
+      "category": "ai",
+      "icon": "anthropic",
+      "brandColor": "D97757",
       "cancelUrl": "https://support.anthropic.com/en/articles/8324034-how-do-i-cancel-my-claude-pro-subscription",
-      "plans": [{ "label": "Pro", "price": 3000, "default": true }, { "label": "Max", "price": 15000 }]
+      "plans": [
+        {
+          "label": "Pro",
+          "price": 3000,
+          "default": true
+        },
+        {
+          "label": "Max",
+          "price": 15000
+        }
+      ],
+      "brandDomain": "anthropic.com"
     },
-    { "name": "Gemini Advanced", "category": "ai", "icon": "googlegemini", "brandColor": "8E75B2",
+    {
+      "name": "Gemini Advanced",
+      "category": "ai",
+      "icon": "googlegemini",
+      "brandColor": "8E75B2",
       "cancelUrl": "https://support.google.com/googleone/answer/9004913?hl=ja",
-      "plans": [{ "label": "AI Premium", "price": 2900, "default": true }]
+      "plans": [
+        {
+          "label": "AI Premium",
+          "price": 2900,
+          "default": true
+        }
+      ],
+      "brandDomain": "gemini.google.com"
     },
-    { "name": "Notion", "category": "ai", "icon": "notion", "brandColor": "000000",
+    {
+      "name": "Notion",
+      "category": "ai",
+      "icon": "notion",
+      "brandColor": "000000",
       "cancelUrl": "https://www.notion.com/help/cancel-your-plan",
       "plans": [
-        { "label": "Plus", "price": 1650, "default": true },
-        { "label": "Business", "price": 2950 }
-      ]
+        {
+          "label": "Plus",
+          "price": 1650,
+          "default": true
+        },
+        {
+          "label": "Business",
+          "price": 2950
+        }
+      ],
+      "brandDomain": "notion.so"
     },
-    { "name": "Canva Pro", "category": "creative", "icon": "canva", "brandColor": "00C4CC",
+    {
+      "name": "Canva Pro",
+      "category": "creative",
+      "icon": "canva",
+      "brandColor": "00C4CC",
       "cancelUrl": "https://www.canva.com/help/cancel-canva-subscription/",
-      "plans": [{ "label": "Pro 個人", "price": 1500, "default": true }]
+      "plans": [
+        {
+          "label": "Pro 個人",
+          "price": 1500,
+          "default": true
+        }
+      ],
+      "brandDomain": "canva.com"
     },
-    { "name": "Perplexity Pro", "category": "ai", "icon": "perplexity", "brandColor": "20808D",
+    {
+      "name": "Perplexity Pro",
+      "category": "ai",
+      "icon": "perplexity",
+      "brandColor": "20808D",
       "cancelUrl": "https://www.perplexity.ai/help-center/en/articles/10352965-how-to-cancel-your-subscription",
-      "plans": [{ "label": "Pro", "price": 3000, "default": true }]
+      "plans": [
+        {
+          "label": "Pro",
+          "price": 3000,
+          "default": true
+        }
+      ],
+      "brandDomain": "perplexity.ai"
     },
-    { "name": "GitHub Copilot", "category": "ai", "icon": "github", "brandColor": "181717",
+    {
+      "name": "GitHub Copilot",
+      "category": "ai",
+      "icon": "github",
+      "brandColor": "181717",
       "cancelUrl": "https://docs.github.com/ja/copilot/managing-copilot/managing-your-copilot-subscription/cancelling-your-copilot-individual-subscription",
       "plans": [
-        { "label": "個人", "price": 1500, "default": true },
-        { "label": "Business", "price": 3000 }
-      ]
+        {
+          "label": "個人",
+          "price": 1500,
+          "default": true
+        },
+        {
+          "label": "Business",
+          "price": 3000
+        }
+      ],
+      "brandDomain": "github.com"
     },
-    { "name": "Cursor Pro", "category": "ai", "icon": "",
+    {
+      "name": "Cursor Pro",
+      "category": "ai",
+      "icon": "",
       "cancelUrl": "https://forum.cursor.com/t/how-to-cancel-cursor-subscription/",
-      "plans": [{ "label": "Pro", "price": 3000, "default": true }]
+      "plans": [
+        {
+          "label": "Pro",
+          "price": 3000,
+          "default": true
+        }
+      ],
+      "brandDomain": "cursor.com"
     },
-
-    { "name": "iCloud+", "category": "cloud", "icon": "icloud", "brandColor": "3693F3",
+    {
+      "name": "iCloud+",
+      "category": "cloud",
+      "icon": "icloud",
+      "brandColor": "3693F3",
       "cancelUrl": "https://support.apple.com/ja-jp/HT207614",
       "plans": [
-        { "label": "50GB", "price": 130 },
-        { "label": "200GB", "price": 400, "default": true },
-        { "label": "2TB", "price": 1300 }
-      ]
+        {
+          "label": "50GB",
+          "price": 130
+        },
+        {
+          "label": "200GB",
+          "price": 400,
+          "default": true
+        },
+        {
+          "label": "2TB",
+          "price": 1300
+        }
+      ],
+      "brandDomain": "icloud.com"
     },
-    { "name": "Google One", "category": "cloud", "icon": "googleone", "brandColor": "4285F4",
+    {
+      "name": "Google One",
+      "category": "cloud",
+      "icon": "googleone",
+      "brandColor": "4285F4",
       "cancelUrl": "https://support.google.com/googleone/answer/9004913?hl=ja",
       "plans": [
-        { "label": "100GB", "price": 250, "default": true },
-        { "label": "200GB", "price": 380 },
-        { "label": "2TB", "price": 1300 }
-      ]
+        {
+          "label": "100GB",
+          "price": 250,
+          "default": true
+        },
+        {
+          "label": "200GB",
+          "price": 380
+        },
+        {
+          "label": "2TB",
+          "price": 1300
+        }
+      ],
+      "brandDomain": "one.google.com"
     },
-    { "name": "Dropbox", "category": "cloud", "icon": "dropbox", "brandColor": "0061FF",
+    {
+      "name": "Dropbox",
+      "category": "cloud",
+      "icon": "dropbox",
+      "brandColor": "0061FF",
       "cancelUrl": "https://help.dropbox.com/ja-jp/account-access/cancel-subscription",
       "plans": [
-        { "label": "Plus", "price": 1500, "default": true },
-        { "label": "Essentials", "price": 2400 }
-      ]
+        {
+          "label": "Plus",
+          "price": 1500,
+          "default": true
+        },
+        {
+          "label": "Essentials",
+          "price": 2400
+        }
+      ],
+      "brandDomain": "dropbox.com"
     },
-
-    { "name": "Kindle Unlimited", "category": "books", "icon": "amazon", "brandColor": "FF9900",
+    {
+      "name": "Kindle Unlimited",
+      "category": "books",
+      "icon": "amazon",
+      "brandColor": "FF9900",
       "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=G5W82HKWUQGDZQEK",
-      "plans": [{ "label": "月額", "price": 980, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 980,
+          "default": true
+        }
+      ],
+      "brandDomain": "amazon.co.jp"
     },
-    { "name": "dマガジン", "category": "books", "icon": "",
+    {
+      "name": "dマガジン",
+      "category": "books",
+      "icon": "",
       "cancelUrl": "https://magazine.dmkt-sp.jp/cancel/select",
-      "plans": [{ "label": "月額", "price": 580, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 580,
+          "default": true
+        }
+      ],
+      "brandDomain": "magazine.dmkt-sp.jp"
     },
-    { "name": "Audible", "category": "books", "icon": "audible", "brandColor": "F8991C",
+    {
+      "name": "Audible",
+      "category": "books",
+      "icon": "audible",
+      "brandColor": "F8991C",
       "cancelUrl": "https://help.audible.co.jp/s/article/AC0019",
-      "plans": [{ "label": "月額", "price": 1500, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 1500,
+          "default": true
+        }
+      ],
+      "brandDomain": "audible.co.jp"
     },
-
-    { "name": "日経電子版", "category": "news", "icon": "",
+    {
+      "name": "日経電子版",
+      "category": "news",
+      "icon": "",
       "cancelUrl": "https://www.nikkei.com/promotion/contents/keiyaku_kaiyaku/",
       "plans": [
-        { "label": "電子版のみ", "price": 4277, "default": true },
-        { "label": "宅配セット", "price": 5900 }
-      ]
+        {
+          "label": "電子版のみ",
+          "price": 4277,
+          "default": true
+        },
+        {
+          "label": "宅配セット",
+          "price": 5900
+        }
+      ],
+      "brandDomain": "nikkei.com"
     },
-    { "name": "NewsPicks プレミアム", "category": "news", "icon": "",
+    {
+      "name": "NewsPicks プレミアム",
+      "category": "news",
+      "icon": "",
       "cancelUrl": "https://help.newspicks.com/hc/ja/categories/360001124111",
-      "plans": [{ "label": "月額", "price": 1850, "default": true }]
+      "plans": [
+        {
+          "label": "月額",
+          "price": 1850,
+          "default": true
+        }
+      ],
+      "brandDomain": "newspicks.com"
     },
-    { "name": "SmartNews+", "category": "news", "icon": "smartnews", "brandColor": "00B5FF",
+    {
+      "name": "SmartNews+",
+      "category": "news",
+      "icon": "smartnews",
+      "brandColor": "00B5FF",
       "cancelUrl": "https://www.smartnews.com/ja/plus/",
-      "plans": [{ "label": "Standard", "price": 480, "default": true }]
+      "plans": [
+        {
+          "label": "Standard",
+          "price": 480,
+          "default": true
+        }
+      ],
+      "brandDomain": "smartnews.com"
     },
-
-    { "name": "スタディサプリ", "category": "learning", "icon": "",
+    {
+      "name": "スタディサプリ",
+      "category": "learning",
+      "icon": "",
       "cancelUrl": "https://studysapuri.jp/support/cancel/",
       "plans": [
-        { "label": "ベーシック", "price": 2178, "default": true },
-        { "label": "個別指導コース", "price": 10780 }
-      ]
+        {
+          "label": "ベーシック",
+          "price": 2178,
+          "default": true
+        },
+        {
+          "label": "個別指導コース",
+          "price": 10780
+        }
+      ],
+      "brandDomain": "studysapuri.jp"
     },
-    { "name": "Duolingo", "category": "learning", "icon": "duolingo", "brandColor": "58CC02",
+    {
+      "name": "Duolingo",
+      "category": "learning",
+      "icon": "duolingo",
+      "brandColor": "58CC02",
       "cancelUrl": "https://blog.duolingo.com/canceling-duolingo-super-or-max/",
-      "plans": [{ "label": "Super", "price": 1300, "default": true }]
+      "plans": [
+        {
+          "label": "Super",
+          "price": 1300,
+          "default": true
+        }
+      ],
+      "brandDomain": "duolingo.com"
     },
-    { "name": "Udemy", "category": "learning", "icon": "udemy", "brandColor": "A435F0",
+    {
+      "name": "Udemy",
+      "category": "learning",
+      "icon": "udemy",
+      "brandColor": "A435F0",
       "cancelUrl": "https://support.udemy.com/hc/ja/articles/229231147",
-      "plans": [{ "label": "Personal Plan", "price": 1800, "default": true }]
+      "plans": [
+        {
+          "label": "Personal Plan",
+          "price": 1800,
+          "default": true
+        }
+      ],
+      "brandDomain": "udemy.com"
     },
-
-    { "name": "ジム月会費", "category": "fitness", "icon": "",
+    {
+      "name": "ジム月会費",
+      "category": "fitness",
+      "icon": "",
       "cancelUrl": "",
       "plans": [
-        { "label": "標準プラン", "price": 8000, "default": true },
-        { "label": "プレミアム", "price": 12000 }
+        {
+          "label": "標準プラン",
+          "price": 8000,
+          "default": true
+        },
+        {
+          "label": "プレミアム",
+          "price": 12000
+        }
       ]
     },
-
-    { "name": "Amazon Prime", "category": "shopping", "icon": "amazon", "brandColor": "FF9900",
+    {
+      "name": "Amazon Prime",
+      "category": "shopping",
+      "icon": "amazon",
+      "brandColor": "FF9900",
       "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=GZ7CCY8R5XF7XV7E",
       "plans": [
-        { "label": "月額", "price": 600, "default": true },
-        { "label": "年額/月割", "price": 492 }
-      ]
+        {
+          "label": "月額",
+          "price": 600,
+          "default": true
+        },
+        {
+          "label": "年額/月割",
+          "price": 492
+        }
+      ],
+      "brandDomain": "amazon.co.jp"
     },
-    { "name": "X Premium", "category": "shopping", "icon": "x", "brandColor": "000000",
+    {
+      "name": "X Premium",
+      "category": "shopping",
+      "icon": "x",
+      "brandColor": "000000",
       "cancelUrl": "https://help.x.com/ja/using-x/x-premium-manage-subscription",
       "plans": [
-        { "label": "ベーシック", "price": 480 },
-        { "label": "プレミアム", "price": 1380, "default": true },
-        { "label": "プラス", "price": 2680 }
-      ]
+        {
+          "label": "ベーシック",
+          "price": 480
+        },
+        {
+          "label": "プレミアム",
+          "price": 1380,
+          "default": true
+        },
+        {
+          "label": "プラス",
+          "price": 2680
+        }
+      ],
+      "brandDomain": "x.com"
     },
-    { "name": "Nintendo Switch Online", "category": "shopping", "icon": "nintendoswitch", "brandColor": "E60012",
+    {
+      "name": "Nintendo Switch Online",
+      "category": "shopping",
+      "icon": "nintendoswitch",
+      "brandColor": "E60012",
       "cancelUrl": "https://en-americas-support.nintendo.com/app/answers/detail/a_id/27326",
       "plans": [
-        { "label": "個人", "price": 306, "default": true },
-        { "label": "ファミリー", "price": 750 },
-        { "label": "+追加パック", "price": 400 }
-      ]
+        {
+          "label": "個人",
+          "price": 306,
+          "default": true
+        },
+        {
+          "label": "ファミリー",
+          "price": 750
+        },
+        {
+          "label": "+追加パック",
+          "price": 400
+        }
+      ],
+      "brandDomain": "nintendo.co.jp"
     },
-    { "name": "PlayStation Plus", "category": "shopping", "icon": "playstation", "brandColor": "003791",
+    {
+      "name": "PlayStation Plus",
+      "category": "shopping",
+      "icon": "playstation",
+      "brandColor": "003791",
       "cancelUrl": "https://www.playstation.com/ja-jp/support/subscriptions/cancel-ps-plus/",
       "plans": [
-        { "label": "Essential", "price": 850, "default": true },
-        { "label": "Extra", "price": 1300 },
-        { "label": "Premium", "price": 1550 }
-      ]
+        {
+          "label": "Essential",
+          "price": 850,
+          "default": true
+        },
+        {
+          "label": "Extra",
+          "price": 1300
+        },
+        {
+          "label": "Premium",
+          "price": 1550
+        }
+      ],
+      "brandDomain": "playstation.com"
     },
-
-    { "name": "Adobe Creative Cloud", "category": "creative", "icon": "adobecreativecloud", "brandColor": "DA1F26",
+    {
+      "name": "Adobe Creative Cloud",
+      "category": "creative",
+      "icon": "adobecreativecloud",
+      "brandColor": "DA1F26",
       "cancelUrl": "https://helpx.adobe.com/jp/manage-account/using/cancel-subscription.html",
       "plans": [
-        { "label": "コンプリート", "price": 6480, "default": true },
-        { "label": "フォトプラン", "price": 1280 }
-      ]
+        {
+          "label": "コンプリート",
+          "price": 6480,
+          "default": true
+        },
+        {
+          "label": "フォトプラン",
+          "price": 1280
+        }
+      ],
+      "brandDomain": "adobe.com"
     },
-    { "name": "Figma", "category": "creative", "icon": "figma", "brandColor": "F24E1E",
+    {
+      "name": "Figma",
+      "category": "creative",
+      "icon": "figma",
+      "brandColor": "F24E1E",
       "cancelUrl": "https://help.figma.com/hc/en-us/articles/360039827574",
-      "plans": [{ "label": "Professional", "price": 1800, "default": true }]
+      "plans": [
+        {
+          "label": "Professional",
+          "price": 1800,
+          "default": true
+        }
+      ],
+      "brandDomain": "figma.com"
     },
-    { "name": "Midjourney", "category": "creative", "icon": "",
+    {
+      "name": "Midjourney",
+      "category": "creative",
+      "icon": "",
       "cancelUrl": "https://docs.midjourney.com/hc/en-us/articles/30314985335821",
       "plans": [
-        { "label": "Basic", "price": 1500, "default": true },
-        { "label": "Standard", "price": 4500 }
-      ]
+        {
+          "label": "Basic",
+          "price": 1500,
+          "default": true
+        },
+        {
+          "label": "Standard",
+          "price": 4500
+        }
+      ],
+      "brandDomain": "midjourney.com"
     },
-
-    { "name": "マネーフォワード ME", "category": "tools", "icon": "",
+    {
+      "name": "マネーフォワード ME",
+      "category": "tools",
+      "icon": "",
       "cancelUrl": "https://support.me.moneyforward.com/hc/ja/articles/360001141151",
-      "plans": [{ "label": "プレミアム", "price": 500, "default": true }]
+      "plans": [
+        {
+          "label": "プレミアム",
+          "price": 500,
+          "default": true
+        }
+      ],
+      "brandDomain": "moneyforward.com"
     },
-    { "name": "freee 会計", "category": "tools", "icon": "",
+    {
+      "name": "freee 会計",
+      "category": "tools",
+      "icon": "",
       "cancelUrl": "https://support.freee.co.jp/hc/ja/articles/202841270",
       "plans": [
-        { "label": "スターター", "price": 1180, "default": true },
-        { "label": "スタンダード", "price": 2380 }
-      ]
+        {
+          "label": "スターター",
+          "price": 1180,
+          "default": true
+        },
+        {
+          "label": "スタンダード",
+          "price": 2380
+        }
+      ],
+      "brandDomain": "freee.co.jp"
     },
-    { "name": "Microsoft 365", "category": "tools", "icon": "microsoft", "brandColor": "5E5E5E",
+    {
+      "name": "Microsoft 365",
+      "category": "tools",
+      "icon": "microsoft",
+      "brandColor": "5E5E5E",
       "cancelUrl": "https://support.microsoft.com/ja-jp/account-billing/c44b22df-7f0e-39bb-9c4c-65d18f3aae72",
       "plans": [
-        { "label": "Personal", "price": 1490, "default": true },
-        { "label": "Family", "price": 2100 }
-      ]
+        {
+          "label": "Personal",
+          "price": 1490,
+          "default": true
+        },
+        {
+          "label": "Family",
+          "price": 2100
+        }
+      ],
+      "brandDomain": "microsoft.com"
     },
-    { "name": "Google Workspace", "category": "tools", "icon": "google", "brandColor": "4285F4",
+    {
+      "name": "Google Workspace",
+      "category": "tools",
+      "icon": "google",
+      "brandColor": "4285F4",
       "cancelUrl": "https://support.google.com/a/answer/1257646?hl=ja",
       "plans": [
-        { "label": "Business Starter", "price": 1360, "default": true },
-        { "label": "Business Standard", "price": 2720 }
-      ]
+        {
+          "label": "Business Starter",
+          "price": 1360,
+          "default": true
+        },
+        {
+          "label": "Business Standard",
+          "price": 2720
+        }
+      ],
+      "brandDomain": "workspace.google.com"
     },
-    { "name": "Slack 有料", "category": "tools", "icon": "slack", "brandColor": "4A154B",
+    {
+      "name": "Slack 有料",
+      "category": "tools",
+      "icon": "slack",
+      "brandColor": "4A154B",
       "cancelUrl": "https://slack.com/help/articles/202618083",
-      "plans": [{ "label": "Pro", "price": 1050, "default": true }]
+      "plans": [
+        {
+          "label": "Pro",
+          "price": 1050,
+          "default": true
+        }
+      ],
+      "brandDomain": "slack.com"
     },
-    { "name": "Zoom Workplace", "category": "tools", "icon": "zoom", "brandColor": "0B5CFF",
+    {
+      "name": "Zoom Workplace",
+      "category": "tools",
+      "icon": "zoom",
+      "brandColor": "0B5CFF",
       "cancelUrl": "https://support.zoom.com/hc/ja/article?id=zm_kb&sysparm_article=KB0061233",
       "plans": [
-        { "label": "Pro", "price": 2125, "default": true },
-        { "label": "Business", "price": 2999 }
-      ]
+        {
+          "label": "Pro",
+          "price": 2125,
+          "default": true
+        },
+        {
+          "label": "Business",
+          "price": 2999
+        }
+      ],
+      "brandDomain": "zoom.us"
     },
-    { "name": "1Password", "category": "tools", "icon": "1password", "brandColor": "0094F5",
+    {
+      "name": "1Password",
+      "category": "tools",
+      "icon": "1password",
+      "brandColor": "0094F5",
       "cancelUrl": "https://support.1password.com/manage-account/",
-      "plans": [{ "label": "個人", "price": 450, "default": true }]
+      "plans": [
+        {
+          "label": "個人",
+          "price": 450,
+          "default": true
+        }
+      ],
+      "brandDomain": "1password.com"
     }
   ]
 }

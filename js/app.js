@@ -1,6 +1,23 @@
 // 共通スクリプト：サブスクのlocalStorage管理・スコアリング・GA4
 
 const STORAGE_KEY = 'subsk_kanri_subscriptions';
+
+// ====== デモモード（?demo=1 で起動。スクショ・QA用） ======
+(function initDemoMode() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo') !== '1') return;
+    const demoSubs = [
+      { id: 'd1', name: 'Netflix', price: 1590, category: 'video', usage: 'often', addedAt: Date.now() - 6000 },
+      { id: 'd2', name: 'Spotify', price: 980, category: 'music', usage: 'often', addedAt: Date.now() - 5000 },
+      { id: 'd3', name: 'Amazon Prime', price: 600, category: 'shopping', usage: 'often', addedAt: Date.now() - 4000 },
+      { id: 'd4', name: 'マンガアプリ', price: 980, category: 'reading', usage: 'unused', addedAt: Date.now() - 3000 },
+      { id: 'd5', name: '使ってないジム', price: 8800, category: 'fitness', usage: 'unused', addedAt: Date.now() - 2000 },
+      { id: 'd6', name: 'クラウドストレージ', price: 1300, category: 'other', usage: 'sometimes', addedAt: Date.now() - 1000 }
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(demoSubs));
+  } catch (e) { /* noop */ }
+})();
 const DATA_BASE = 'data';
 
 // ====== GA4 イベント計測ユーティリティ ======
