@@ -1,7 +1,6 @@
 // 結果ページ：スコアリング結果＋解約候補ランキング＋カテゴリ別円グラフ＋アフィリ訴求
 
 const TODAY = new Date().toISOString().split('T')[0];
-const LINE_OFFICIAL_URL_BASE = 'https://lin.ee/PLACEHOLDER';
 
 let _categories = [];
 
@@ -12,10 +11,12 @@ async function initResult() {
     return;
   }
 
-  const [affiliates, popular] = await Promise.all([
+  const [affResult, popular] = await Promise.all([
     loadAffiliates(),
     loadPopularSubscriptions(),
   ]);
+  const affiliates = affResult.affiliates;
+  const themes = affResult.themes;
   _categories = popular.categories;
   const summary = calcSummary(subs);
   const categorySummary = calcCategorySummary(subs, _categories);
@@ -28,7 +29,7 @@ async function initResult() {
     savings_yearly: summary.savingsYearly,
   });
 
-  renderResult(summary, affiliates, categorySummary);
+  renderResult(summary, affiliates, themes, categorySummary);
   // renderResult後にChart.js初期化
   renderCategoryChart(categorySummary);
 }
@@ -98,7 +99,7 @@ function renderCategoryChart(categorySummary) {
   }
 }
 
-function renderResult(summary, affiliates, categorySummary) {
+function renderResult(summary, affiliates, themes, categorySummary) {
   const root = document.getElementById('result-root');
   const { count, monthlyTotal, yearlyTotal, candidates, savingsMonthly, savingsYearly, scored } = summary;
 
@@ -108,9 +109,8 @@ function renderResult(summary, affiliates, categorySummary) {
   // ランキング表示
   const rankingHTML = scored.map((sub, idx) => renderSubRanking(sub, idx)).join('');
 
-  // 推奨アフィリ：状況に応じて切替
-  const affList = selectAffiliates(summary, affiliates);
-  const affHTML = affList.map(renderAffiliateCard).join('');
+  // テーマ別アフィリセクション
+  const affHTML = renderAffiliatesByTheme(affiliates, themes);
 
   root.innerHTML = `
     <div class="max-w-xl mx-auto" id="result-capture">
@@ -187,10 +187,10 @@ function renderResult(summary, affiliates, categorySummary) {
         ${rankingHTML}
       </div>
 
-      <!-- アフィリ訴求 -->
-      <div class="bg-emerald-50 rounded-2xl p-5 mb-6 border border-emerald-100">
-        <h2 class="text-base font-bold text-gray-800 mb-1">${candidates.length > 0 ? '💡 浮いたお金、何に回す？' : '🌱 さらに家計を磨くなら'}</h2>
-        <p class="text-xs text-gray-600 mb-4">だっちょが実際に試して良かったサービスをまとめました。</p>
+      <!-- アフィリ訴求（テーマ別） -->
+      <div class="mb-6">
+        <h2 class="text-base font-bold text-gray-800 mb-1 px-1">💡 次のアクション、何を選ぶ？</h2>
+        <p class="text-xs text-gray-600 mb-4 px-1">だっちょが実際に試して良かったサービスを「目的別」に並べました。</p>
         ${affHTML}
       </div>
 
@@ -209,19 +209,14 @@ function renderResult(summary, affiliates, categorySummary) {
     </div>
 
     <div class="max-w-xl mx-auto">
-      <button id="share-btn" class="block w-full bg-white hover:bg-emerald-50 text-emerald-700 font-bold py-3 rounded-full border-2 border-emerald-600 transition mb-3">
-        📷 結果を画像で保存・SNSシェア
-      </button>
-      <a href="app.html" id="edit-cta" class="block w-full text-center bg-white hover:bg-emerald-50 text-emerald-700 font-bold py-3 rounded-full border-2 border-emerald-200 transition mb-3">
-        サブスクを追加・編集する
+      <a href="app.html" id="edit-cta" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-full transition mb-3 shadow-md">
+        ✏️ サブスクを追加・編集する
       </a>
-      <a href="${LINE_OFFICIAL_URL_BASE}?from=subsk&candidates=${candidates.length}" id="line-cta" target="_blank" rel="noopener" class="block w-full text-center bg-[#06C755] hover:bg-[#05B04C] text-white font-bold py-3 rounded-full transition mb-3">
-        💚 LINEで節約ネタを定期的に受け取る
+      <p class="text-xs text-gray-500 text-center mb-4">※ 登録したサブスクはブラウザに保存されているので、次回も続きから使えます</p>
+      <a href="https://www.instagram.com/dacchooo_money/" id="insta-cta" target="_blank" rel="noopener" class="block w-full text-center bg-white hover:bg-pink-50 text-pink-600 font-bold py-3 rounded-full border-2 border-pink-200 transition mb-3">
+        💌 だっちょに感想を送る（インスタDM）
       </a>
-      <a href="https://www.instagram.com/dacchooo_money/" id="insta-cta" target="_blank" rel="noopener" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-full transition">
-        だっちょのインスタを見る
-      </a>
-      <p class="text-xs text-gray-400 text-center mt-8 leading-relaxed">※ このページ内のリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。掲載情報・解約ページURLは目安であり、最新の内容は各公式サイトでご確認ください。サービスのロゴ・名称は各社の商標です。</p>
+      <p class="text-xs text-gray-400 text-center mt-8 leading-relaxed">※ このページ内のリンク先には、広告（アフィリエイトリンク）を含むコンテンツがあります。掲載情報は目安です。解約方法は決済種別（Web／Apple／Google等）によって異なる場合があります。最新の手順は各公式ヘルプでご確認ください。サービスのロゴ・名称は各社の商標です。</p>
       <p class="text-xs text-gray-500 text-center mt-3 space-x-3">
         <a href="about.html" class="hover:text-emerald-700 underline">運営者情報</a>
         <a href="privacy.html" class="hover:text-emerald-700 underline">プライバシーポリシー</a>
@@ -252,21 +247,14 @@ function renderResult(summary, affiliates, categorySummary) {
       });
     });
   });
-  document.getElementById('line-cta')?.addEventListener('click', () => {
-    trackEvent('line_signup_click', { candidates: summary.candidates.length });
-  });
   document.getElementById('insta-cta')?.addEventListener('click', () => {
-    trackEvent('instagram_click');
+    trackEvent('feedback_dm_click', { candidates: summary.candidates.length });
   });
   document.getElementById('blog-link')?.addEventListener('click', () => {
     trackEvent('blog_link_click');
   });
   document.getElementById('edit-cta')?.addEventListener('click', () => {
     trackEvent('edit_subs_click');
-  });
-  document.getElementById('share-btn')?.addEventListener('click', () => {
-    trackEvent('share_click', { candidates: summary.candidates.length });
-    captureAndShare();
   });
 }
 
@@ -325,7 +313,7 @@ function renderSubRanking(sub, idx) {
           </button>
           ${sub.cancelUrl ? `
             <a href="${escapeAttr(sub.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link text-xs font-bold text-red-600 hover:text-red-700 underline" data-sub-name="${escapeAttr(sub.name)}">
-              🚫 解約ページを開く
+              🚫 解約方法を確認
             </a>
           ` : ''}
         </div>
@@ -343,32 +331,37 @@ function escapeAttr(str) {
     .replace(/>/g, '&gt;');
 }
 
-function selectAffiliates(summary, affiliates) {
-  const { candidates } = summary;
-  const logic = ['money-career-default', 'abcash']; // always
-  if (candidates.length >= 3) {
-    logic.push('money-career-lifeplan');
-  }
-  if (candidates.length <= 1) {
-    logic.push('gfs');
-    logic.push('torches');
-  } else {
-    logic.push('gfs');
-  }
-  return logic.map((id) => ({ id, ...affiliates[id] })).filter((a) => a.name);
+function renderAffiliatesByTheme(affiliates, themes) {
+  // テーマごとに紐付く商材をグルーピング
+  const themeGroups = themes.map((theme) => {
+    const items = Object.entries(affiliates)
+      .filter(([id, a]) => a.themeId === theme.id)
+      .map(([id, a]) => ({ id, ...a }));
+    return { theme, items };
+  }).filter((g) => g.items.length > 0);
+
+  return themeGroups.map((g) => `
+    <div class="bg-white rounded-2xl border border-emerald-100 p-4 mb-4 shadow-sm">
+      <div class="mb-3 pb-2 border-b border-gray-100">
+        <p class="text-base font-bold text-gray-800">${g.theme.emoji} ${g.theme.label}</p>
+        <p class="text-xs text-gray-500 mt-0.5">${g.theme.lead}</p>
+      </div>
+      ${g.items.map(renderAffiliateCard).join('')}
+    </div>
+  `).join('');
 }
 
 function renderAffiliateCard(a) {
   return `
-    <article class="bg-white rounded-xl shadow-sm border border-emerald-100 overflow-hidden mb-3">
-      <div class="p-4">
+    <article class="bg-emerald-50 rounded-xl border border-emerald-100 overflow-hidden mb-3 last:mb-0">
+      <div class="p-3">
         <div class="flex items-center justify-between mb-1">
           <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">${a.category}</span>
           <span class="text-xs font-bold text-gray-400">PR</span>
         </div>
         <h4 class="text-base font-bold text-gray-800 mb-0.5">${a.name}</h4>
         <p class="text-xs text-emerald-700 font-bold mb-2">${a.tagline}</p>
-        <div class="flex items-start gap-2 mb-3 p-2 bg-emerald-50 rounded-lg">
+        <div class="flex items-start gap-2 mb-3 p-2 bg-white rounded-lg">
           <img src="images/characters/dacchooo.png" alt="だっちょ" class="w-7 h-7 rounded-full flex-shrink-0 border border-emerald-200 bg-white">
           <p class="text-xs text-gray-700 leading-relaxed">${a.characterComment}</p>
         </div>
@@ -378,76 +371,6 @@ function renderAffiliateCard(a) {
       </div>
     </article>
   `;
-}
-
-async function captureAndShare() {
-  const btn = document.getElementById('share-btn');
-  if (!window.html2canvas) {
-    alert('画像生成ライブラリが読み込めませんでした。再読み込みしてもう一度お試しください。');
-    return;
-  }
-  const target = document.getElementById('result-capture');
-  if (!target) return;
-
-  const originalText = btn.textContent;
-  btn.textContent = '⏳ 画像生成中…';
-  btn.disabled = true;
-
-  try {
-    const canvas = await window.html2canvas(target, {
-      backgroundColor: '#ecfdf5',
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) {
-        alert('画像生成に失敗しました。');
-        btn.textContent = originalText;
-        btn.disabled = false;
-        return;
-      }
-      const filename = `subsk-tanaoroshi-${Date.now()}.png`;
-      const file = new File([blob], filename, { type: 'image/png' });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: 'サブスク棚卸し結果',
-            text: '自分のサブスク、棚卸ししてみたよ！',
-          });
-          trackEvent('share_success', { method: 'web_share_api' });
-          btn.textContent = originalText;
-          btn.disabled = false;
-          return;
-        } catch (e) {
-          // キャンセル時はDLにフォールバック
-        }
-      }
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      trackEvent('share_success', { method: 'download' });
-      btn.textContent = '✅ 画像を保存しました！';
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.disabled = false;
-      }, 2000);
-    }, 'image/png');
-  } catch (e) {
-    console.error(e);
-    alert('画像生成に失敗しました。');
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
 }
 
 // ====== Phase 5-C: コスト換算＋達成バッジ ======

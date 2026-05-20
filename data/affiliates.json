@@ -1,18 +1,21 @@
 {
-  "_note": "全案件にPR表記必須。体験済み案件のみ掲載（feedback_unexperienced_affiliate_priority準拠）。URLは原則だっちょブログ経由（dacchooo-money.com）→記事内にPR表記＋アフィリリンク。",
-  "_lastUpdated": "2026-05-18",
+  "_note": "全案件にPR表記必須。体験済み案件のみ掲載。URLは原則だっちょブログ経由（dacchooo-money.com）→記事内にPR表記＋アフィリリンク。",
+  "_lastUpdated": "2026-05-20",
   "affiliates": {
     "money-career-default": {
       "name": "マネーキャリア（FP無料相談）",
       "tagline": "プロのFPに家計を見てもらえる無料相談",
       "category": "FP無料相談",
       "url": "https://dacchooo-money.com/money-career/",
+      "themeId": "deepen",
+      "themeLabel": "もっと根本から家計を見直したい",
+      "themeEmoji": "🎯",
       "features": [
         "完全無料で何度でも相談OK",
         "オンラインで自宅から完結",
         "保険の押し売りなし"
       ],
-      "characterComment": "サブスクの見直しが終わったら、家計全体もぜひ一度プロに見てもらってください。第三者の目線が入るとムダがクリアに見えます。",
+      "characterComment": "サブスク以外の固定費（保険・通信・住居）もまとめてプロに見てもらうのがオススメ。第三者の目線が入るとムダがクリアに見えます。",
       "experienced": true
     },
     "money-career-lifeplan": {
@@ -20,12 +23,15 @@
       "tagline": "将来の家計シミュレーションを無料で",
       "category": "FP無料相談・ライフプラン",
       "url": "https://dacchooo-money.com/money-career/",
+      "themeId": "deepen",
+      "themeLabel": "将来お金が足りるか不安",
+      "themeEmoji": "🔮",
       "features": [
         "将来の収支をシミュレーション",
         "教育費・老後資金の準備度がわかる",
         "完全無料"
       ],
-      "characterComment": "サブスクで浮いたお金、何に回す？が決まらない人にオススメ。「将来お金足りるかな？」の答え合わせができます。",
+      "characterComment": "「将来お金足りるかな？」がモヤモヤある人にオススメ。具体的な数字で安心できます。",
       "experienced": true
     },
     "abcash": {
@@ -33,12 +39,15 @@
       "tagline": "お金の不安をプロに相談できる無料体験",
       "category": "マネースクール（無料体験）",
       "url": "https://dacchooo-money.com/abcash/",
+      "themeId": "learn_money",
+      "themeLabel": "お金そのものを勉強したい",
+      "themeEmoji": "📚",
       "features": [
         "完全無料の体験会",
         "マンツーマン相談スタイル",
         "オンラインで受講可能"
       ],
-      "characterComment": "ぼくは無料体験だけ受けました。家計改善を「習慣」にしたい人には、コーチが伴走してくれるABCashが効きます。",
+      "characterComment": "「お金の基礎を体系的に学びたい」人向け。コーチが伴走してくれるので、家計改善を習慣化したい人に効きます。",
       "experienced": true
     },
     "gfs": {
@@ -46,12 +55,15 @@
       "tagline": "投資の基礎を無料動画でサクッと学べる",
       "category": "投資スクール（無料）",
       "url": "https://dacchooo-money.com/bafessa-2/",
+      "themeId": "learn_invest",
+      "themeLabel": "投資を勉強したい",
+      "themeEmoji": "🎓",
       "features": [
         "完全無料の動画講座",
         "投資の基礎が体系的に学べる",
         "登録は1分で完了"
       ],
-      "characterComment": "サブスク代を浮かせたら、次は「お金を働かせる」フェーズ。GFSは完全無料で投資の基礎が学べるのでまずココから。",
+      "characterComment": "「投資をちゃんと勉強してから始めたい」人にピッタリ。完全無料で投資の基礎が一通り学べます。",
       "experienced": true
     },
     "torches": {
@@ -59,18 +71,22 @@
       "tagline": "1万円から始められる不動産少額投資",
       "category": "不動産クラウドファンディング",
       "url": "https://dacchooo-money.com/torches/",
+      "themeId": "grow_money",
+      "themeLabel": "浮いたお金で投資を始めたい",
+      "themeEmoji": "🌱",
       "features": [
         "1万円から投資可能",
         "プロが厳選した案件のみ",
         "口座開設は無料"
       ],
-      "characterComment": "ぼくも口座開設しました。サブスク数千円が「資産」に化ける感覚は、家計が前向きになります。",
+      "characterComment": "ぼくも口座開設しました。サブスク代を浮かせた数千円が「資産」に化ける感覚で、家計が前向きになります。",
       "experienced": true
     }
   },
-  "_recommendation_logic": {
-    "always": ["money-career-default", "abcash"],
-    "many_candidates": ["money-career-lifeplan"],
-    "healthy": ["gfs", "torches"]
-  }
+  "themes": [
+    { "id": "deepen", "label": "もっと根本から家計を強くしたい", "emoji": "🎯", "lead": "サブスク以外の固定費（保険・住居・通信）もまとめて見直したい人へ" },
+    { "id": "learn_money", "label": "お金そのものを勉強したい", "emoji": "📚", "lead": "「家計改善を習慣化したい」「お金の基礎をちゃんと学びたい」人へ" },
+    { "id": "learn_invest", "label": "投資を勉強したい", "emoji": "🎓", "lead": "「投資をちゃんと理解してから始めたい」人へ" },
+    { "id": "grow_money", "label": "浮いたお金で投資を始めたい", "emoji": "🌱", "lead": "「サブスク代を投資に回したい」「少額から試したい」人へ" }
+  ]
 }

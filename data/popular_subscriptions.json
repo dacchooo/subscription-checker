@@ -19,7 +19,7 @@
   ],
   "subscriptions": [
     { "name": "Netflix", "category": "video", "icon": "netflix", "brandColor": "E50914",
-      "cancelUrl": "https://www.netflix.com/cancelplan",
+      "cancelUrl": "https://help.netflix.com/ja/node/407",
       "plans": [
         { "label": "広告つき", "price": 890 },
         { "label": "スタンダード", "price": 1590, "default": true },
@@ -28,18 +28,18 @@
       ]
     },
     { "name": "Amazon Prime Video", "category": "video", "icon": "primevideo", "brandColor": "00A8E1",
-      "cancelUrl": "https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=GH9PE4HPSCNBNRX9",
+      "cancelUrl": "https://www.amazon.co.jp/gp/video/settings/payment-settings",
       "plans": [{ "label": "月額", "price": 600, "default": true }, { "label": "年額/月割", "price": 492 }]
     },
     { "name": "Disney+", "category": "video", "icon": "disneyplus", "brandColor": "113CCF",
-      "cancelUrl": "https://www.disneyplus.com/account/subscription",
+      "cancelUrl": "https://help.disneyplus.com/ja-JP?contentId=Sg2tNc4uKZRz",
       "plans": [
         { "label": "スタンダード", "price": 990, "default": true },
         { "label": "プレミアム", "price": 1320 }
       ]
     },
     { "name": "Hulu", "category": "video", "icon": "hulu", "brandColor": "1CE783",
-      "cancelUrl": "https://www.happyon.jp/account",
+      "cancelUrl": "https://help.happyon.jp/article/categories/cancel",
       "plans": [{ "label": "月額", "price": 1026, "default": true }]
     },
     { "name": "U-NEXT", "category": "video", "icon": "",
@@ -54,7 +54,7 @@
       ]
     },
     { "name": "ABEMAプレミアム", "category": "video", "icon": "",
-      "cancelUrl": "https://abema.tv/about/premium-cancel",
+      "cancelUrl": "https://abema.tv/about/premium#cancel",
       "plans": [{ "label": "月額", "price": 1080, "default": true }]
     },
     { "name": "Apple TV+", "category": "video", "icon": "appletv", "brandColor": "000000",
@@ -62,7 +62,7 @@
       "plans": [{ "label": "月額", "price": 900, "default": true }]
     },
     { "name": "YouTube Premium", "category": "video", "icon": "youtube", "brandColor": "FF0000",
-      "cancelUrl": "https://www.youtube.com/paid_memberships",
+      "cancelUrl": "https://support.google.com/youtube/answer/6308762?hl=ja",
       "plans": [
         { "label": "個人", "price": 1280, "default": true },
         { "label": "ファミリー", "price": 2280 },
@@ -71,7 +71,7 @@
     },
 
     { "name": "Spotify", "category": "music", "icon": "spotify", "brandColor": "1DB954",
-      "cancelUrl": "https://www.spotify.com/jp/account/subscription/",
+      "cancelUrl": "https://support.spotify.com/jp/article/cancel-premium/",
       "plans": [
         { "label": "Premium 個人", "price": 980, "default": true },
         { "label": "Duo", "price": 1280 },
@@ -96,7 +96,7 @@
     },
 
     { "name": "ChatGPT Plus", "category": "ai", "icon": "openai", "brandColor": "412991",
-      "cancelUrl": "https://chatgpt.com/#settings/Subscription",
+      "cancelUrl": "https://help.openai.com/en/articles/8554471",
       "plans": [{ "label": "Plus", "price": 3000, "default": true }, { "label": "Pro", "price": 30000 }]
     },
     { "name": "Claude Pro", "category": "ai", "icon": "anthropic", "brandColor": "D97757",
@@ -172,7 +172,7 @@
     },
 
     { "name": "日経電子版", "category": "news", "icon": "",
-      "cancelUrl": "https://www.nikkei.com/r123/?ng=NIK_FREE_TOP",
+      "cancelUrl": "https://www.nikkei.com/promotion/contents/keiyaku_kaiyaku/",
       "plans": [
         { "label": "電子版のみ", "price": 4277, "default": true },
         { "label": "宅配セット", "price": 5900 }
@@ -188,7 +188,7 @@
     },
 
     { "name": "スタディサプリ", "category": "learning", "icon": "",
-      "cancelUrl": "https://studysapuri.jp/course/junior/contact/",
+      "cancelUrl": "https://studysapuri.jp/support/cancel/",
       "plans": [
         { "label": "ベーシック", "price": 2178, "default": true },
         { "label": "個別指導コース", "price": 10780 }
@@ -219,7 +219,7 @@
       ]
     },
     { "name": "X Premium", "category": "shopping", "icon": "x", "brandColor": "000000",
-      "cancelUrl": "https://x.com/i/premium_sign_up",
+      "cancelUrl": "https://help.x.com/ja/using-x/x-premium-manage-subscription",
       "plans": [
         { "label": "ベーシック", "price": 480 },
         { "label": "プレミアム", "price": 1380, "default": true },

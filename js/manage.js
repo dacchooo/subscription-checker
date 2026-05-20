@@ -545,7 +545,7 @@ function renderSubCard(sub) {
       </div>
       ${sub.cancelUrl ? `
         <a href="${escapeAttr(sub.cancelUrl)}" target="_blank" rel="noopener" class="cancel-link block mt-2 pt-2 border-t border-gray-100 text-xs text-red-600 hover:text-red-700 font-bold text-center" data-sub-name="${escapeAttr(sub.name)}">
-          🚫 解約ページを開く →
+          🚫 解約方法を確認する →
         </a>
       ` : ''}
     </div>

@@ -23,7 +23,10 @@ async function loadJSON(path) {
 
 async function loadAffiliates() {
   const data = await loadJSON('affiliates.json');
-  return data.affiliates;
+  return {
+    affiliates: data.affiliates,
+    themes: data.themes || [],
+  };
 }
 
 async function loadPopularSubscriptions() {
