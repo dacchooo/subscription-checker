@@ -1,25 +1,25 @@
-// app.html用：サブスクの登録・一覧・削除・よくあるサブスクサジェスト
+// app.html用：サブスクの登録・一覧・削除・サービスピッカー（ロゴ付き）
 
 let _popular = { categories: [], subscriptions: [] };
-let _activeCategoryFilter = null;
+let _pickerState = { open: false, view: 'services', categoryFilter: null, query: '', selectedSub: null };
 
 async function init() {
   const form = document.getElementById('sub-form');
   const clearBtn = document.getElementById('clear-all-btn');
-  const popularToggle = document.getElementById('popular-toggle');
+  const openPickerBtn = document.getElementById('open-picker-btn');
+  const openManualBtn = document.getElementById('open-manual-btn');
+  const closeManualBtn = document.getElementById('close-manual-btn');
 
-  // 人気サブスクとカテゴリ読み込み
   _popular = await loadPopularSubscriptions();
   populateCategorySelect();
-  renderPopularPanel();
 
   form.addEventListener('submit', onSubmit);
   clearBtn.addEventListener('click', onClearAll);
-  popularToggle.addEventListener('click', togglePopularPanel);
+  openPickerBtn.addEventListener('click', openPicker);
+  openManualBtn.addEventListener('click', toggleManualForm);
+  closeManualBtn.addEventListener('click', toggleManualForm);
 
   renderList();
-
-  // GA4: 棚卸し画面到達
   trackEvent('checker_open', { sub_count: loadSubscriptions().length });
 }
 
@@ -29,84 +29,325 @@ function populateCategorySelect() {
   select.innerHTML = _popular.categories
     .map((c) => `<option value="${c.id}">${c.emoji} ${c.label}</option>`)
     .join('');
-  // デフォルトはothers
   select.value = 'other';
 }
 
-function togglePopularPanel() {
-  const panel = document.getElementById('popular-panel');
-  const arrow = document.getElementById('popular-arrow');
-  if (!panel || !arrow) return;
-  const opened = !panel.classList.contains('hidden');
-  if (opened) {
-    panel.classList.add('hidden');
-    arrow.textContent = '▼';
+function toggleManualForm() {
+  const form = document.getElementById('sub-form');
+  if (!form) return;
+  if (form.classList.contains('hidden')) {
+    form.classList.remove('hidden');
+    document.getElementById('sub-name').focus();
+    trackEvent('manual_form_open');
   } else {
-    panel.classList.remove('hidden');
-    arrow.textContent = '▲';
-    trackEvent('popular_panel_open');
+    form.classList.add('hidden');
+    form.reset();
+    document.getElementById('sub-category').value = 'other';
   }
 }
 
-function renderPopularPanel() {
-  // カテゴリフィルター
-  const catContainer = document.getElementById('popular-categories');
-  const listContainer = document.getElementById('popular-list');
-  if (!catContainer || !listContainer) return;
+// ====== サービスピッカー（モーダル） ======
 
-  catContainer.innerHTML = `
-    <button data-cat="ALL" class="popular-cat-btn flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold border-2 ${_activeCategoryFilter === null ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-emerald-200'}">すべて</button>
-    ${_popular.categories.map((c) => `
-      <button data-cat="${c.id}" class="popular-cat-btn flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold border-2 ${_activeCategoryFilter === c.id ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-emerald-200'}">${c.emoji} ${c.label}</button>
-    `).join('')}
-  `;
+function openPicker() {
+  _pickerState = { open: true, view: 'services', categoryFilter: null, query: '', selectedSub: null };
+  trackEvent('picker_open');
+  renderPicker();
+}
 
-  catContainer.querySelectorAll('.popular-cat-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cat = btn.dataset.cat;
-      _activeCategoryFilter = cat === 'ALL' ? null : cat;
-      renderPopularPanel();
-    });
-  });
+function closePicker() {
+  document.getElementById('picker-modal')?.remove();
+  _pickerState.open = false;
+}
 
-  // サブスクボタン
-  const filtered = _activeCategoryFilter
-    ? _popular.subscriptions.filter((s) => s.category === _activeCategoryFilter)
-    : _popular.subscriptions;
+function renderPicker() {
+  document.getElementById('picker-modal')?.remove();
 
-  if (filtered.length === 0) {
-    listContainer.innerHTML = `<p class="col-span-2 text-xs text-gray-500 text-center py-4">該当なし</p>`;
-    return;
+  const modal = document.createElement('div');
+  modal.id = 'picker-modal';
+  modal.className = 'fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50';
+
+  if (_pickerState.view === 'services') {
+    modal.innerHTML = renderServicesView();
+  } else {
+    modal.innerHTML = renderPlanView();
   }
 
-  listContainer.innerHTML = filtered.map((sub) => {
-    const cat = findCategoryById(_popular.categories, sub.category);
-    return `
-      <button type="button" class="popular-item-btn text-left p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-xl transition" data-name="${escapeHtml(sub.name)}" data-price="${sub.price}" data-category="${sub.category}">
-        <div class="flex items-center gap-1 mb-1">
-          <span class="text-sm">${cat.emoji}</span>
-          <span class="text-[10px] text-gray-500">${cat.label}</span>
+  document.body.appendChild(modal);
+  attachPickerListeners(modal);
+}
+
+function renderServicesView() {
+  const { categoryFilter, query } = _pickerState;
+  const filteredSubs = filterSubscriptions(_popular.subscriptions, categoryFilter, query);
+
+  return `
+    <div class="bg-white w-full max-w-md md:max-w-lg h-[85vh] md:h-[80vh] rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col">
+      <!-- ヘッダー -->
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <button id="picker-close" class="text-emerald-700 text-sm font-bold">閉じる</button>
+        <h3 class="text-base font-bold text-gray-800">サブスクを追加</h3>
+        <div class="w-12"></div>
+      </div>
+
+      <!-- 検索 -->
+      <div class="p-4 border-b border-gray-100">
+        <input id="picker-search" type="text" placeholder="サービス名で検索…" value="${escapeAttr(query)}"
+          class="w-full p-3 bg-gray-100 rounded-xl text-sm focus:bg-white focus:border-emerald-500 outline-none border-2 border-transparent transition">
+      </div>
+
+      <!-- カテゴリタブ -->
+      <div class="px-4 py-3 border-b border-gray-100">
+        <div class="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1">
+          <button data-cat="ALL" class="picker-cat-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border-2 ${categoryFilter === null ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200'}">すべて</button>
+          ${_popular.categories.map((c) => `
+            <button data-cat="${c.id}" class="picker-cat-btn flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border-2 ${categoryFilter === c.id ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200'}">${c.emoji} ${c.label}</button>
+          `).join('')}
         </div>
-        <p class="text-xs font-bold text-gray-800 leading-tight truncate">${escapeHtml(sub.name)}</p>
-        <p class="text-xs text-emerald-700 font-bold mt-1">${formatJPY(sub.price)}<span class="text-[10px] text-gray-500">/月</span></p>
-      </button>
-    `;
-  }).join('');
+      </div>
 
-  listContainer.querySelectorAll('.popular-item-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.getElementById('sub-name').value = btn.dataset.name;
-      document.getElementById('sub-price').value = btn.dataset.price;
-      document.getElementById('sub-category').value = btn.dataset.category;
-      trackEvent('popular_item_select', { name: btn.dataset.name });
-      // フォームへスクロール＆使用頻度フィールドにフォーカス
-      const firstRadio = document.querySelector('input[name="usage"]');
-      if (firstRadio) {
-        firstRadio.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-  });
+      <!-- サービスグリッド -->
+      <div class="flex-1 overflow-y-auto p-4">
+        ${filteredSubs.length === 0 ? `
+          <div class="text-center text-sm text-gray-500 py-10">
+            <p>該当するサービスがありません</p>
+            <p class="text-xs mt-2">「閉じる」→「手動で入力する」から追加できます</p>
+          </div>
+        ` : `
+          <div class="grid grid-cols-3 gap-3">
+            ${filteredSubs.map(renderServiceTile).join('')}
+          </div>
+          <p class="text-xs text-gray-400 text-center mt-6">表示金額は公式の参考値・実額と異なる場合は次画面で編集できます</p>
+        `}
+      </div>
+    </div>
+  `;
 }
+
+function renderServiceTile(sub) {
+  const cat = findCategoryById(_popular.categories, sub.category);
+  const logoHTML = renderServiceLogo(sub);
+  return `
+    <button data-pick-name="${escapeAttr(sub.name)}" class="picker-service-btn bg-gray-50 hover:bg-emerald-50 rounded-2xl p-3 text-center transition flex flex-col items-center gap-1 border border-transparent hover:border-emerald-200">
+      <div class="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
+        ${logoHTML}
+      </div>
+      <p class="text-xs font-bold text-gray-800 leading-tight line-clamp-2 mt-1">${escapeHtml(sub.name)}</p>
+      <p class="text-[10px] text-gray-500">${cat.emoji} ${cat.label}</p>
+    </button>
+  `;
+}
+
+function renderServiceLogo(sub) {
+  if (sub.icon) {
+    const color = sub.brandColor ? sub.brandColor : null;
+    const url = color
+      ? `https://cdn.simpleicons.org/${sub.icon}/${color}`
+      : `https://cdn.simpleicons.org/${sub.icon}`;
+    return `<img src="${url}" alt="${escapeAttr(sub.name)}" class="w-8 h-8 object-contain" onerror="this.outerHTML='<span class=\\'text-xl\\'>📦</span>'">`;
+  }
+  // アイコン未設定なら、カテゴリ絵文字でフォールバック
+  const cat = findCategoryById(_popular.categories, sub.category);
+  return `<span class="text-2xl">${cat.emoji}</span>`;
+}
+
+function renderPlanView() {
+  const sub = _pickerState.selectedSub;
+  if (!sub) return '';
+  const cat = findCategoryById(_popular.categories, sub.category);
+  const logoHTML = renderServiceLogo(sub);
+  const defaultPlan = sub.plans.find((p) => p.default) || sub.plans[0];
+  const selectedPlanIdx = _pickerState.selectedPlanIdx ?? sub.plans.findIndex((p) => p.default);
+  const selectedPlan = sub.plans[selectedPlanIdx >= 0 ? selectedPlanIdx : 0];
+  const editedPrice = _pickerState.editedPrice ?? selectedPlan.price;
+
+  return `
+    <div class="bg-white w-full max-w-md md:max-w-lg h-[90vh] md:max-h-[85vh] rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col">
+      <!-- ヘッダー -->
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <button id="picker-back" class="text-emerald-700 text-sm font-bold">← 戻る</button>
+        <h3 class="text-base font-bold text-gray-800">プラン選択</h3>
+        <button id="picker-close" class="text-gray-400 text-2xl leading-none">×</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5">
+        <!-- サービス情報 -->
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden mb-2">
+            ${logoHTML}
+          </div>
+          <p class="text-lg font-bold text-gray-800">${escapeHtml(sub.name)}</p>
+          <p class="text-xs text-gray-500">${cat.emoji} ${cat.label}</p>
+        </div>
+
+        <!-- プラン一覧 -->
+        <p class="text-sm font-bold text-gray-700 mb-2">プランを選択</p>
+        <div class="space-y-2 mb-5">
+          ${sub.plans.map((p, i) => `
+            <button data-plan-idx="${i}" class="picker-plan-btn w-full flex items-center justify-between p-4 rounded-xl text-left transition ${i === selectedPlanIdx ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}">
+              <div>
+                <p class="text-sm font-bold">${escapeHtml(p.label)}</p>
+                <p class="text-xs ${i === selectedPlanIdx ? 'text-gray-300' : 'text-gray-500'}">月次</p>
+              </div>
+              <p class="text-base font-bold">¥${p.price.toLocaleString('ja-JP')}</p>
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- 金額編集 -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-5">
+          <p class="text-sm font-bold text-gray-700 mb-1">💰 金額を編集</p>
+          <p class="text-xs text-gray-500 mb-3">プラン変更や値上げで金額が違う場合は編集できます</p>
+          <div class="flex items-center gap-2">
+            <input id="picker-price-input" type="number" min="0" max="100000" step="1" value="${editedPrice}"
+              class="flex-1 p-3 bg-white border-2 border-gray-200 rounded-xl text-gray-800 focus:border-emerald-500 outline-none">
+            <span class="text-sm text-gray-500">JPY /月次</span>
+          </div>
+        </div>
+
+        <!-- 使用頻度（ここで答えてもらう） -->
+        <p class="text-sm font-bold text-gray-700 mb-2">最近、使ってますか？</p>
+        <div class="grid grid-cols-1 gap-2 mb-3">
+          ${[
+            { value: 'often', emoji: '😊', label: 'よく使ってる（週1回以上）' },
+            { value: 'sometimes', emoji: '🤔', label: 'たまに使う（月に数回）' },
+            { value: 'unused', emoji: '😴', label: '1ヶ月以上使ってない' },
+          ].map((opt) => `
+            <button data-usage="${opt.value}" class="picker-usage-btn flex items-center gap-3 p-3 border-2 rounded-xl transition ${_pickerState.usage === opt.value ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'}">
+              <span class="text-xl">${opt.emoji}</span>
+              <span class="text-sm text-gray-700">${opt.label}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- 追加ボタン -->
+      <div class="p-4 border-t border-gray-100">
+        <button id="picker-confirm" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-2xl transition disabled:opacity-40 disabled:cursor-not-allowed" ${_pickerState.usage ? '' : 'disabled'}>
+          このプランで追加
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function filterSubscriptions(subs, categoryFilter, query) {
+  let filtered = subs;
+  if (categoryFilter) filtered = filtered.filter((s) => s.category === categoryFilter);
+  if (query && query.trim()) {
+    const q = query.trim().toLowerCase();
+    filtered = filtered.filter((s) => s.name.toLowerCase().includes(q));
+  }
+  return filtered;
+}
+
+function attachPickerListeners(modal) {
+  // 共通：閉じる・背景クリック
+  modal.querySelector('#picker-close')?.addEventListener('click', closePicker);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closePicker();
+  });
+
+  if (_pickerState.view === 'services') {
+    // 検索
+    const searchInput = modal.querySelector('#picker-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        _pickerState.query = e.target.value;
+        // フォーカス維持のためフルrerenderせず、結果エリアだけ更新したいが、シンプル優先でフルrerender
+        const cursor = searchInput.selectionStart;
+        renderPicker();
+        const newInput = document.querySelector('#picker-search');
+        if (newInput) {
+          newInput.focus();
+          newInput.setSelectionRange(cursor, cursor);
+        }
+      });
+    }
+    // カテゴリ
+    modal.querySelectorAll('.picker-cat-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        _pickerState.categoryFilter = cat === 'ALL' ? null : cat;
+        renderPicker();
+      });
+    });
+    // サービス選択 → プラン選択画面へ
+    modal.querySelectorAll('.picker-service-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.pickName;
+        const sub = _popular.subscriptions.find((s) => s.name === name);
+        if (!sub) return;
+        const defaultIdx = sub.plans.findIndex((p) => p.default);
+        _pickerState.selectedSub = sub;
+        _pickerState.selectedPlanIdx = defaultIdx >= 0 ? defaultIdx : 0;
+        _pickerState.editedPrice = sub.plans[_pickerState.selectedPlanIdx].price;
+        _pickerState.usage = null;
+        _pickerState.view = 'plan';
+        trackEvent('picker_service_select', { name });
+        renderPicker();
+      });
+    });
+  } else if (_pickerState.view === 'plan') {
+    // 戻る
+    modal.querySelector('#picker-back')?.addEventListener('click', () => {
+      _pickerState.view = 'services';
+      _pickerState.selectedSub = null;
+      renderPicker();
+    });
+    // プラン選択
+    modal.querySelectorAll('.picker-plan-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.planIdx);
+        _pickerState.selectedPlanIdx = idx;
+        _pickerState.editedPrice = _pickerState.selectedSub.plans[idx].price;
+        renderPicker();
+      });
+    });
+    // 金額編集
+    const priceInput = modal.querySelector('#picker-price-input');
+    if (priceInput) {
+      priceInput.addEventListener('input', (e) => {
+        const v = Number(e.target.value);
+        if (Number.isFinite(v) && v >= 0) {
+          _pickerState.editedPrice = v;
+        }
+      });
+    }
+    // 使用頻度
+    modal.querySelectorAll('.picker-usage-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        _pickerState.usage = btn.dataset.usage;
+        const cursor = (modal.querySelector('#picker-price-input') || {}).selectionStart;
+        renderPicker();
+      });
+    });
+    // 追加
+    modal.querySelector('#picker-confirm')?.addEventListener('click', confirmPickerAdd);
+  }
+}
+
+function confirmPickerAdd() {
+  const sub = _pickerState.selectedSub;
+  const plan = sub.plans[_pickerState.selectedPlanIdx];
+  const price = Math.max(0, Math.min(100000, Number(_pickerState.editedPrice) || plan.price));
+  const usage = _pickerState.usage;
+  if (!usage) return;
+
+  const fullName = sub.plans.length > 1 ? `${sub.name}（${plan.label}）` : sub.name;
+  addSubscription({ name: fullName, price, usage, category: sub.category });
+  trackEvent('picker_subscription_add', { name: sub.name, plan: plan.label, price, usage });
+
+  closePicker();
+  updateDacchoooMessage();
+  renderList();
+
+  setTimeout(() => {
+    const list = document.getElementById('sub-list');
+    if (list) list.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, 100);
+}
+
+// ====== 手動入力フォーム ======
 
 function onSubmit(e) {
   e.preventDefault();
@@ -121,18 +362,15 @@ function onSubmit(e) {
   if (price < 0 || price > 100000) return;
 
   addSubscription({ name, price, usage, category });
-  trackEvent('subscription_add', { price, usage, category });
+  trackEvent('subscription_add', { price, usage, category, source: 'manual' });
 
-  // フォームリセット（カテゴリはother戻し）
   form.reset();
   document.getElementById('sub-category').value = 'other';
-  document.getElementById('sub-name').focus();
+  form.classList.add('hidden'); // 入力後は自動で閉じる
 
-  // メッセージ更新
   updateDacchoooMessage();
   renderList();
 
-  // スクロール：追加したアイテムが見えるように
   setTimeout(() => {
     const list = document.getElementById('sub-list');
     if (list) list.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -177,7 +415,6 @@ function renderList() {
   clearBtn.classList.remove('hidden');
   resultBottom.classList.remove('hidden');
 
-  // 月額合計
   const monthlyTotal = subs.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
 
   list.innerHTML = `
@@ -189,7 +426,6 @@ function renderList() {
     ${subs.map(renderSubCard).join('')}
   `;
 
-  // 削除ボタンにイベント
   list.querySelectorAll('[data-delete-id]').forEach((btn) => {
     btn.addEventListener('click', () => onDelete(btn.dataset.deleteId));
   });
@@ -226,7 +462,7 @@ function updateDacchoooMessage() {
   if (!msg) return;
 
   if (subs.length === 0) {
-    msg.textContent = 'サブスクをひとつずつ登録してください。「よくあるサブスク」から選ぶとサクッと入力できます！';
+    msg.textContent = 'サブスクをひとつずつ登録してください。「よくあるサブスクから選ぶ」をタップすると、ロゴ付きでサクッと追加できます！';
   } else if (subs.length < 3) {
     msg.textContent = `${subs.length}件追加しました！クレカ明細を見ながらだと思い出しやすいですよ。`;
   } else if (subs.length < 6) {
@@ -243,6 +479,15 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 document.addEventListener('DOMContentLoaded', init);

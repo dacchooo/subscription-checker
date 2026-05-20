@@ -1,5 +1,5 @@
 {
-  "_note": "よくあるサブスクのリスト。月額金額は公式の標準プラン目安（2026-05時点・参考）。実際の契約金額はユーザー各自確認。最終更新日は_lastUpdatedで管理。",
+  "_note": "よくあるサブスクのリスト。月額金額は公式の標準プラン目安（2026-05時点・参考）。実際の契約金額はユーザー各自確認。ロゴは Simple Icons (https://simpleicons.org/) CC0 を CDN経由で取得。",
   "_lastUpdated": "2026-05-20",
   "_priceDisclaimer": "金額は公式の標準プラン参考値。家族プラン・キャンペーン・年払い等で実額は変わります。",
   "categories": [
@@ -13,51 +13,246 @@
     { "id": "fitness", "label": "ジム・フィットネス", "emoji": "💪", "color": "#84cc16" },
     { "id": "shopping", "label": "ショッピング・特典", "emoji": "🛒", "color": "#ec4899" },
     { "id": "creative", "label": "クリエイティブ", "emoji": "🎨", "color": "#a855f7" },
+    { "id": "tools", "label": "ツール・業務", "emoji": "🛠️", "color": "#0ea5e9" },
     { "id": "other", "label": "その他", "emoji": "📦", "color": "#94a3b8" }
   ],
   "subscriptions": [
-    { "name": "Netflix（スタンダード）", "price": 1590, "category": "video" },
-    { "name": "Amazon Prime Video", "price": 600, "category": "video" },
-    { "name": "Disney+", "price": 990, "category": "video" },
-    { "name": "Hulu", "price": 1026, "category": "video" },
-    { "name": "U-NEXT", "price": 2189, "category": "video" },
-    { "name": "DAZN", "price": 4200, "category": "video" },
-    { "name": "ABEMAプレミアム", "price": 1080, "category": "video" },
-    { "name": "Apple TV+", "price": 900, "category": "video" },
+    { "name": "Netflix", "category": "video", "icon": "netflix", "brandColor": "E50914",
+      "plans": [
+        { "label": "広告つき", "price": 890 },
+        { "label": "スタンダード", "price": 1590, "default": true },
+        { "label": "プレミアム", "price": 2290 },
+        { "label": "ベーシック（旧プラン）", "price": 1190 }
+      ]
+    },
+    { "name": "Amazon Prime Video", "category": "video", "icon": "primevideo", "brandColor": "00A8E1",
+      "plans": [{ "label": "月額", "price": 600, "default": true }, { "label": "年額/月割", "price": 492 }]
+    },
+    { "name": "Disney+", "category": "video", "icon": "disneyplus", "brandColor": "113CCF",
+      "plans": [
+        { "label": "スタンダード", "price": 990, "default": true },
+        { "label": "プレミアム", "price": 1320 }
+      ]
+    },
+    { "name": "Hulu", "category": "video", "icon": "hulu", "brandColor": "1CE783",
+      "plans": [{ "label": "月額", "price": 1026, "default": true }]
+    },
+    { "name": "U-NEXT", "category": "video", "icon": "",
+      "plans": [{ "label": "月額", "price": 2189, "default": true }]
+    },
+    { "name": "DAZN", "category": "video", "icon": "dazn", "brandColor": "F8F500",
+      "plans": [
+        { "label": "Global", "price": 1925 },
+        { "label": "Standard", "price": 4200, "default": true }
+      ]
+    },
+    { "name": "ABEMAプレミアム", "category": "video", "icon": "",
+      "plans": [{ "label": "月額", "price": 1080, "default": true }]
+    },
+    { "name": "Apple TV+", "category": "video", "icon": "appletv", "brandColor": "000000",
+      "plans": [{ "label": "月額", "price": 900, "default": true }]
+    },
+    { "name": "YouTube Premium", "category": "video", "icon": "youtube", "brandColor": "FF0000",
+      "plans": [
+        { "label": "個人", "price": 1280, "default": true },
+        { "label": "ファミリー", "price": 2280 },
+        { "label": "学生", "price": 780 }
+      ]
+    },
 
-    { "name": "Spotify Premium", "price": 980, "category": "music" },
-    { "name": "Apple Music", "price": 1080, "category": "music" },
-    { "name": "YouTube Premium", "price": 1280, "category": "music" },
-    { "name": "Amazon Music Unlimited", "price": 1080, "category": "music" },
+    { "name": "Spotify", "category": "music", "icon": "spotify", "brandColor": "1DB954",
+      "plans": [
+        { "label": "Premium 個人", "price": 980, "default": true },
+        { "label": "Duo", "price": 1280 },
+        { "label": "ファミリー", "price": 1580 },
+        { "label": "学生", "price": 480 }
+      ]
+    },
+    { "name": "Apple Music", "category": "music", "icon": "applemusic", "brandColor": "FA243C",
+      "plans": [
+        { "label": "個人", "price": 1080, "default": true },
+        { "label": "ファミリー", "price": 1680 },
+        { "label": "学生", "price": 580 }
+      ]
+    },
+    { "name": "Amazon Music Unlimited", "category": "music", "icon": "amazonmusic", "brandColor": "232F3E",
+      "plans": [
+        { "label": "個人", "price": 1080, "default": true },
+        { "label": "Prime会員", "price": 980 }
+      ]
+    },
 
-    { "name": "ChatGPT Plus", "price": 3000, "category": "ai" },
-    { "name": "Claude Pro", "price": 3000, "category": "ai" },
-    { "name": "Gemini Advanced", "price": 2900, "category": "ai" },
-    { "name": "Notion 有料プラン", "price": 1650, "category": "ai" },
-    { "name": "Canva Pro", "price": 1500, "category": "ai" },
+    { "name": "ChatGPT Plus", "category": "ai", "icon": "openai", "brandColor": "412991",
+      "plans": [{ "label": "Plus", "price": 3000, "default": true }, { "label": "Pro", "price": 30000 }]
+    },
+    { "name": "Claude Pro", "category": "ai", "icon": "anthropic", "brandColor": "D97757",
+      "plans": [{ "label": "Pro", "price": 3000, "default": true }, { "label": "Max", "price": 15000 }]
+    },
+    { "name": "Gemini Advanced", "category": "ai", "icon": "googlegemini", "brandColor": "8E75B2",
+      "plans": [{ "label": "AI Premium", "price": 2900, "default": true }]
+    },
+    { "name": "Notion", "category": "ai", "icon": "notion", "brandColor": "000000",
+      "plans": [
+        { "label": "Plus", "price": 1650, "default": true },
+        { "label": "Business", "price": 2950 }
+      ]
+    },
+    { "name": "Canva Pro", "category": "creative", "icon": "canva", "brandColor": "00C4CC",
+      "plans": [{ "label": "Pro 個人", "price": 1500, "default": true }]
+    },
+    { "name": "Perplexity Pro", "category": "ai", "icon": "perplexity", "brandColor": "20808D",
+      "plans": [{ "label": "Pro", "price": 3000, "default": true }]
+    },
+    { "name": "GitHub Copilot", "category": "ai", "icon": "github", "brandColor": "181717",
+      "plans": [
+        { "label": "個人", "price": 1500, "default": true },
+        { "label": "Business", "price": 3000 }
+      ]
+    },
+    { "name": "Cursor Pro", "category": "ai", "icon": "",
+      "plans": [{ "label": "Pro", "price": 3000, "default": true }]
+    },
 
-    { "name": "iCloud+ (200GB)", "price": 400, "category": "cloud" },
-    { "name": "Google One (100GB)", "price": 250, "category": "cloud" },
-    { "name": "Dropbox Plus", "price": 1500, "category": "cloud" },
+    { "name": "iCloud+", "category": "cloud", "icon": "icloud", "brandColor": "3693F3",
+      "plans": [
+        { "label": "50GB", "price": 130 },
+        { "label": "200GB", "price": 400, "default": true },
+        { "label": "2TB", "price": 1300 }
+      ]
+    },
+    { "name": "Google One", "category": "cloud", "icon": "googleone", "brandColor": "4285F4",
+      "plans": [
+        { "label": "100GB", "price": 250, "default": true },
+        { "label": "200GB", "price": 380 },
+        { "label": "2TB", "price": 1300 }
+      ]
+    },
+    { "name": "Dropbox", "category": "cloud", "icon": "dropbox", "brandColor": "0061FF",
+      "plans": [
+        { "label": "Plus", "price": 1500, "default": true },
+        { "label": "Essentials", "price": 2400 }
+      ]
+    },
 
-    { "name": "Kindle Unlimited", "price": 980, "category": "books" },
-    { "name": "dマガジン", "price": 580, "category": "books" },
-    { "name": "コミックシーモア読み放題", "price": 780, "category": "books" },
+    { "name": "Kindle Unlimited", "category": "books", "icon": "amazon", "brandColor": "FF9900",
+      "plans": [{ "label": "月額", "price": 980, "default": true }]
+    },
+    { "name": "dマガジン", "category": "books", "icon": "",
+      "plans": [{ "label": "月額", "price": 580, "default": true }]
+    },
+    { "name": "Audible", "category": "books", "icon": "audible", "brandColor": "F8991C",
+      "plans": [{ "label": "月額", "price": 1500, "default": true }]
+    },
 
-    { "name": "日経電子版", "price": 4277, "category": "news" },
-    { "name": "NewsPicks プレミアム", "price": 1850, "category": "news" },
+    { "name": "日経電子版", "category": "news", "icon": "",
+      "plans": [
+        { "label": "電子版のみ", "price": 4277, "default": true },
+        { "label": "宅配セット", "price": 5900 }
+      ]
+    },
+    { "name": "NewsPicks プレミアム", "category": "news", "icon": "",
+      "plans": [{ "label": "月額", "price": 1850, "default": true }]
+    },
+    { "name": "SmartNews+", "category": "news", "icon": "smartnews", "brandColor": "00B5FF",
+      "plans": [{ "label": "Standard", "price": 480, "default": true }]
+    },
 
-    { "name": "スタディサプリ（ベーシック）", "price": 2178, "category": "learning" },
-    { "name": "Duolingo Plus", "price": 1300, "category": "learning" },
-    { "name": "Audible", "price": 1500, "category": "learning" },
+    { "name": "スタディサプリ", "category": "learning", "icon": "",
+      "plans": [
+        { "label": "ベーシック", "price": 2178, "default": true },
+        { "label": "個別指導コース", "price": 10780 }
+      ]
+    },
+    { "name": "Duolingo", "category": "learning", "icon": "duolingo", "brandColor": "58CC02",
+      "plans": [{ "label": "Super", "price": 1300, "default": true }]
+    },
+    { "name": "Udemy", "category": "learning", "icon": "udemy", "brandColor": "A435F0",
+      "plans": [{ "label": "Personal Plan", "price": 1800, "default": true }]
+    },
 
-    { "name": "ジム月会費", "price": 8000, "category": "fitness" },
-    { "name": "ヨガスタジオ", "price": 12000, "category": "fitness" },
+    { "name": "ジム月会費", "category": "fitness", "icon": "",
+      "plans": [
+        { "label": "標準プラン", "price": 8000, "default": true },
+        { "label": "プレミアム", "price": 12000 }
+      ]
+    },
 
-    { "name": "Amazon Prime", "price": 600, "category": "shopping" },
-    { "name": "X Premium", "price": 1380, "category": "shopping" },
+    { "name": "Amazon Prime", "category": "shopping", "icon": "amazon", "brandColor": "FF9900",
+      "plans": [
+        { "label": "月額", "price": 600, "default": true },
+        { "label": "年額/月割", "price": 492 }
+      ]
+    },
+    { "name": "X Premium", "category": "shopping", "icon": "x", "brandColor": "000000",
+      "plans": [
+        { "label": "ベーシック", "price": 480 },
+        { "label": "プレミアム", "price": 1380, "default": true },
+        { "label": "プラス", "price": 2680 }
+      ]
+    },
+    { "name": "Nintendo Switch Online", "category": "shopping", "icon": "nintendoswitch", "brandColor": "E60012",
+      "plans": [
+        { "label": "個人", "price": 306, "default": true },
+        { "label": "ファミリー", "price": 750 },
+        { "label": "+追加パック", "price": 400 }
+      ]
+    },
+    { "name": "PlayStation Plus", "category": "shopping", "icon": "playstation", "brandColor": "003791",
+      "plans": [
+        { "label": "Essential", "price": 850, "default": true },
+        { "label": "Extra", "price": 1300 },
+        { "label": "Premium", "price": 1550 }
+      ]
+    },
 
-    { "name": "Adobe Creative Cloud", "price": 6480, "category": "creative" },
-    { "name": "Figma 有料プラン", "price": 1800, "category": "creative" }
+    { "name": "Adobe Creative Cloud", "category": "creative", "icon": "adobecreativecloud", "brandColor": "DA1F26",
+      "plans": [
+        { "label": "コンプリート", "price": 6480, "default": true },
+        { "label": "フォトプラン", "price": 1280 }
+      ]
+    },
+    { "name": "Figma", "category": "creative", "icon": "figma", "brandColor": "F24E1E",
+      "plans": [{ "label": "Professional", "price": 1800, "default": true }]
+    },
+    { "name": "Midjourney", "category": "creative", "icon": "",
+      "plans": [
+        { "label": "Basic", "price": 1500, "default": true },
+        { "label": "Standard", "price": 4500 }
+      ]
+    },
+
+    { "name": "マネーフォワード ME", "category": "tools", "icon": "",
+      "plans": [{ "label": "プレミアム", "price": 500, "default": true }]
+    },
+    { "name": "freee 会計", "category": "tools", "icon": "",
+      "plans": [
+        { "label": "スターター", "price": 1180, "default": true },
+        { "label": "スタンダード", "price": 2380 }
+      ]
+    },
+    { "name": "Microsoft 365", "category": "tools", "icon": "microsoft", "brandColor": "5E5E5E",
+      "plans": [
+        { "label": "Personal", "price": 1490, "default": true },
+        { "label": "Family", "price": 2100 }
+      ]
+    },
+    { "name": "Google Workspace", "category": "tools", "icon": "google", "brandColor": "4285F4",
+      "plans": [
+        { "label": "Business Starter", "price": 1360, "default": true },
+        { "label": "Business Standard", "price": 2720 }
+      ]
+    },
+    { "name": "Slack 有料", "category": "tools", "icon": "slack", "brandColor": "4A154B",
+      "plans": [{ "label": "Pro", "price": 1050, "default": true }]
+    },
+    { "name": "Zoom Workplace", "category": "tools", "icon": "zoom", "brandColor": "0B5CFF",
+      "plans": [
+        { "label": "Pro", "price": 2125, "default": true },
+        { "label": "Business", "price": 2999 }
+      ]
+    },
+    { "name": "1Password", "category": "tools", "icon": "1password", "brandColor": "0094F5",
+      "plans": [{ "label": "個人", "price": 450, "default": true }]
+    }
   ]
 }
