@@ -167,6 +167,9 @@ function renderResult(summary, affiliates, themes, categorySummary, previousSnap
         </div>
       </div>
 
+      <!-- 支払い予定サマリー -->
+      ${buildPaymentScheduleSummary(scored)}
+
       <!-- 履歴比較（Phase 9・前回スナップショットがある場合のみ） -->
       ${buildHistoryComparisonSection(summary, previousSnapshot)}
 
@@ -458,6 +461,124 @@ function buildHistoryComparisonSection(summary, previous) {
       ` : ''}
     </div>
   `;
+}
+
+// ====== 支払い予定サマリー ======
+
+function buildPaymentScheduleSummary(scoredSubs) {
+  const today = startOfDay(new Date());
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const sevenDaysLater = addDays(today, 7);
+  const billingEvents = buildUpcomingBillingEvents(scoredSubs, today, sevenDaysLater);
+  const remainingThisMonth = buildBillingEventsForMonth(scoredSubs, today.getFullYear(), today.getMonth())
+    .filter((event) => event.date >= today && event.date <= monthEnd)
+    .sort((a, b) => a.date - b.date);
+  const remainingMonthTotal = remainingThisMonth.reduce((sum, event) => sum + event.price, 0);
+  const nextSevenEvents = billingEvents
+    .filter((event) => event.date >= today && event.date <= sevenDaysLater)
+    .sort((a, b) => a.date - b.date);
+  const nextSevenTotal = nextSevenEvents.reduce((sum, event) => sum + event.price, 0);
+  const urgentTrials = buildTrialItems(scoredSubs)
+    .filter((item) => item.daysLeft >= 0 && item.daysLeft <= 7)
+    .sort((a, b) => a.daysLeft - b.daysLeft);
+  const expiredTrials = buildTrialItems(scoredSubs)
+    .filter((item) => item.daysLeft < 0)
+    .sort((a, b) => b.daysLeft - a.daysLeft);
+  const billingSetCount = scoredSubs.filter((s) => hasBillingDay(s)).length;
+  const trialSetCount = scoredSubs.filter((s) => s.trialEndDate).length;
+
+  return `
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-100 mb-6">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-base font-bold text-gray-800 mb-1">📆 支払い予定サマリー</h2>
+          <p class="text-xs text-gray-500">${billingSetCount}件の引き落とし日・${trialSetCount}件のトライアル期限をもとに表示</p>
+        </div>
+        <a href="app.html" class="text-xs font-bold text-emerald-700 hover:underline flex-shrink-0">設定する</a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+          <p class="text-xs font-bold text-emerald-700 mb-1">今月あといくら？</p>
+          <p class="text-2xl font-bold text-gray-800">${formatJPY(remainingMonthTotal)}</p>
+          <p class="text-xs text-gray-500 mt-1">${remainingThisMonth.length > 0 ? `残り${remainingThisMonth.length}件の予定` : billingSetCount > 0 ? '今月の残り予定はなし' : '引き落とし日が未設定です'}</p>
+          ${remainingThisMonth.length > 0 ? `<p class="text-[10px] text-gray-500 mt-2 truncate">次: ${formatScheduleDate(remainingThisMonth[0].date)} ${escapeHtml(remainingThisMonth[0].name)}</p>` : ''}
+        </div>
+
+        <div class="bg-amber-50 rounded-xl p-4 border border-amber-100">
+          <p class="text-xs font-bold text-amber-700 mb-1">7日以内の引き落とし</p>
+          <p class="text-2xl font-bold text-gray-800">${nextSevenEvents.length}<span class="text-sm font-normal text-gray-500">件</span></p>
+          <p class="text-xs text-gray-500 mt-1">${nextSevenEvents.length > 0 ? `合計 ${formatJPY(nextSevenTotal)}` : billingSetCount > 0 ? '直近7日は予定なし' : '日付設定で表示されます'}</p>
+          ${nextSevenEvents.slice(0, 2).map((event) => `
+            <p class="text-[10px] text-gray-600 mt-1 truncate">${formatScheduleDate(event.date)} ${escapeHtml(event.name)} ${formatJPY(event.price)}</p>
+          `).join('')}
+        </div>
+
+        <div class="bg-rose-50 rounded-xl p-4 border border-rose-100">
+          <p class="text-xs font-bold text-rose-700 mb-1">無料トライアル期限</p>
+          <p class="text-2xl font-bold text-gray-800">${urgentTrials.length + expiredTrials.length}<span class="text-sm font-normal text-gray-500">件</span></p>
+          <p class="text-xs text-gray-500 mt-1">${expiredTrials.length > 0 ? `${expiredTrials.length}件は期限切れの可能性` : urgentTrials.length > 0 ? '7日以内に終了予定' : trialSetCount > 0 ? '直近7日は期限なし' : '期限設定で表示されます'}</p>
+          ${[...expiredTrials, ...urgentTrials].slice(0, 2).map((item) => `
+            <p class="text-[10px] text-gray-600 mt-1 truncate">${escapeHtml(item.name)} ${item.daysLeft < 0 ? `${Math.abs(item.daysLeft)}日前に終了` : item.daysLeft === 0 ? '今日終了' : `あと${item.daysLeft}日`}</p>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildUpcomingBillingEvents(scoredSubs, fromDate, toDate) {
+  const events = [];
+  const cursor = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1);
+  while (cursor <= toDate) {
+    events.push(...buildBillingEventsForMonth(scoredSubs, cursor.getFullYear(), cursor.getMonth()));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return events;
+}
+
+function buildBillingEventsForMonth(scoredSubs, year, monthIndex) {
+  return scoredSubs
+    .filter(hasBillingDay)
+    .map((s) => {
+      const date = getBillingDateForMonth(s.billingDay, year, monthIndex);
+      return { ...s, date, price: Number(s.price) || 0 };
+    });
+}
+
+function getBillingDateForMonth(billingDay, year, monthIndex) {
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const safeDay = Math.min(Number(billingDay), daysInMonth);
+  return new Date(year, monthIndex, safeDay);
+}
+
+function buildTrialItems(scoredSubs) {
+  const today = startOfDay(new Date());
+  return scoredSubs.filter((s) => s.trialEndDate).map((s) => {
+    const end = startOfDay(new Date(s.trialEndDate));
+    const daysLeft = Math.floor((end - today) / (1000 * 60 * 60 * 24));
+    return { ...s, daysLeft };
+  });
+}
+
+function hasBillingDay(sub) {
+  return sub.billingDay && sub.billingDay >= 1 && sub.billingDay <= 31;
+}
+
+function startOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return startOfDay(d);
+}
+
+function formatScheduleDate(date) {
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 // ====== Phase 8: 無料トライアル管理 ======
