@@ -3,7 +3,7 @@
 加入中のサブスクを3項目入力するだけで、解約検討度を★1〜5でスコアリングするWebツール。
 ブログ記事「サブスク棚卸し」（https://dacchooo-money.com/subscription-review/）の遷移先として、フォロワー向けに無料配布する静的サイト。
 
-**🚀 本番URL：** https://dacchooo.github.io/subscription-checker/（GitHub Pages公開予定）
+**🚀 本番URL：** https://dacchooo.github.io/subscription-checker/（GitHub Pages公開済み）
 
 ## 構成
 
@@ -62,15 +62,14 @@ subscription-checker/
 - 節約見込み額（★4以上の合計）
 - 解約検討度ランキング
 - アフィリ訴求（マネキャリ / ABCash / GFS / TORCHES）
-- 画像保存・SNSシェア
-- LINE / インスタ動線
+- LINE / インスタDM動線
 
 ## ローカル開発
 
 ```bash
 cd subscription-checker
-/usr/bin/python3 -m http.server 8765
-# → http://localhost:8765/ でアクセス
+/usr/bin/python3 -m http.server 8766
+# → http://localhost:8766/ でアクセス
 ```
 
 ## デプロイ
@@ -108,4 +107,4 @@ git push
 - `result_view` - 結果ページ表示
 - `affiliate_click` - アフィリリンククリック
 - `line_signup_click` - LINEボタンクリック
-- `share_click` / `share_success` - 画像シェア
+- `feedback_dm_click` - インスタDM導線クリック

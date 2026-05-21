@@ -232,6 +232,9 @@ function renderResult(summary, affiliates, themes, categorySummary, previousSnap
         ✏️ サブスクを追加・編集する
       </a>
       <p class="text-xs text-gray-500 text-center mb-4">※ 登録したサブスクはブラウザに保存されているので、次回も続きから使えます</p>
+      <a href="https://line.me/R/ti/p/@107guqxd" id="line-cta" target="_blank" rel="noopener" class="block w-full text-center bg-[#06C755] hover:bg-[#05b54e] text-white font-bold py-3 rounded-full transition mb-3 shadow-sm">
+        🌱 次のミニアプリをLINEで受け取る
+      </a>
       <a href="https://www.instagram.com/dacchooo_money/" id="insta-cta" target="_blank" rel="noopener" class="block w-full text-center bg-white hover:bg-pink-50 text-pink-600 font-bold py-3 rounded-full border-2 border-pink-200 transition mb-3">
         💌 だっちょに感想を送る（インスタDM）
       </a>
@@ -268,6 +271,9 @@ function renderResult(summary, affiliates, themes, categorySummary, previousSnap
   });
   document.getElementById('insta-cta')?.addEventListener('click', () => {
     trackEvent('feedback_dm_click', { candidates: summary.candidates.length });
+  });
+  document.getElementById('line-cta')?.addEventListener('click', () => {
+    trackEvent('line_signup_click', { source: 'subscription_checker_result' });
   });
   document.getElementById('blog-link')?.addEventListener('click', () => {
     trackEvent('blog_link_click');
