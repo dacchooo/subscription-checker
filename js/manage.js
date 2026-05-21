@@ -582,6 +582,8 @@ function renderSubCard(sub) {
   const u = usageMap[sub.usage] || usageMap.often;
   const cat = findCategoryById(_popular.categories, sub.category);
   const dailyCost = Math.round((sub.price * 12) / 365);
+  const stars = scoreToStars(calcScore(sub));
+  const starColor = stars >= 4 ? 'text-amber-500' : stars >= 3 ? 'text-yellow-500' : 'text-gray-400';
 
   return `
     <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100">
@@ -591,6 +593,7 @@ function renderSubCard(sub) {
           <p class="font-bold text-gray-800 truncate">${escapeHtml(sub.name)}</p>
           <p class="text-xs ${u.color}">${u.label} ・ <span class="text-gray-500">${cat.emoji} ${cat.label}</span></p>
           <p class="text-[10px] text-gray-400">1日あたり ${formatJPY(dailyCost)}</p>
+          <p class="text-sm ${starColor} font-bold leading-tight mt-0.5">${'★'.repeat(stars)}<span class="text-gray-200">${'★'.repeat(5 - stars)}</span> <span class="text-[10px] text-gray-500 font-normal">解約検討度</span></p>
         </div>
         <div class="text-right flex-shrink-0">
           <p class="font-bold text-gray-800">${formatJPY(sub.price)}</p>
