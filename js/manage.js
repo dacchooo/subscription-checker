@@ -480,7 +480,6 @@ function onClearAll() {
 }
 
 function onDelete(id) {
-  if (!confirm('このサブスクを削除しますか？')) return;
   deleteSubscription(id);
   trackEvent('subscription_delete');
   renderList();
