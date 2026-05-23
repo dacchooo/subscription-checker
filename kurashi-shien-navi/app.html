@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>診断｜暮らしの支援制度ナビ</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#10b981">
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏠%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <main class="shell shell--narrow">
+    <header class="topbar">
+      <a href="index.html">トップ</a>
+      <strong>支援制度ナビ</strong>
+      <a href="result.html">結果</a>
+    </header>
+
+    <section class="card">
+      <div class="speech">
+        <img src="images/characters/dacchooo.png" alt="だっちょ">
+        <div class="speech__bubble">近いものを選んでください。わからない項目は、いちばん近い感覚でOKです！</div>
+      </div>
+    </section>
+
+    <form id="navigator-form" class="stack">
+      <section class="card form-section">
+        <h2>1. お住まい</h2>
+        <div class="grid grid--2">
+          <label>
+            <span>都道府県</span>
+            <select id="prefecture" name="prefecture" required>
+              <option value="">選択してください</option>
+            </select>
+          </label>
+          <label>
+            <span>市区町村</span>
+            <input id="city" name="city" type="text" placeholder="例：横浜市、世田谷区" required>
+          </label>
+        </div>
+        <p class="hint">自治体ページは、入力した市区町村名で公式検索リンクを作成します。</p>
+      </section>
+
+      <section class="card form-section">
+        <h2>2. 家族構成</h2>
+        <div class="choice-grid" id="family-options"></div>
+      </section>
+
+      <section class="card form-section">
+        <h2>3. いま一番近い困りごと</h2>
+        <div class="choice-grid choice-grid--wide" id="scene-options"></div>
+      </section>
+
+      <section class="card form-section">
+        <h2>4. あてはまる状況</h2>
+        <p class="hint">複数選択できます。わからないものは選ばなくてOKです。</p>
+        <div class="check-list" id="detail-options"></div>
+      </section>
+
+      <section class="card form-section">
+        <h2>5. 結果の出し方</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="show-local-links" name="showLocalLinks" checked>
+          <span>自治体の公式ページを探すリンクも表示する</span>
+        </label>
+        <button class="button button--primary button--full" type="submit">支援制度の候補を見る</button>
+      </section>
+    </form>
+
+    <footer class="footer">
+      <a href="about.html">運営者情報</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="terms.html">利用規約</a>
+    </footer>
+  </main>
+  <script src="js/app.js?v=2"></script>
+</body>
+</html>
