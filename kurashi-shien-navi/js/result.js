@@ -16,6 +16,13 @@ async function initResultPage() {
     const data = await loadPrograms();
     const results = scorePrograms(data.programs, answers).slice(0, 7);
     renderResults(root, answers, results, data.lastVerified);
+    trackEvent('support_navi_result_view', {
+      result_count: results.length,
+      prefecture: answers.prefecture,
+      family: answers.family,
+      scene: answers.scene,
+      detail_count: (answers.details || []).length,
+    });
   } catch (error) {
     root.innerHTML = `
       <section class="card alert">
@@ -180,5 +187,17 @@ function sceneLabel(id) {
 function detailLabel(id) {
   return (DETAIL_OPTIONS.find((item) => item.id === id) || {}).label || id;
 }
+
+document.addEventListener('click', (event) => {
+  const link = event.target.closest('a');
+  if (!link) return;
+
+  const href = link.getAttribute('href') || '';
+  if (link.classList.contains('link-card--official')) {
+    trackEvent('support_navi_official_click', { url: href });
+  } else if (link.classList.contains('link-card') && href.includes('google.com/search')) {
+    trackEvent('support_navi_local_search_click', { url: href });
+  }
+});
 
 document.addEventListener('DOMContentLoaded', initResultPage);

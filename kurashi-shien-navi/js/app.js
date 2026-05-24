@@ -58,6 +58,8 @@ function initAppPage() {
   const form = document.getElementById('navigator-form');
   if (!form) return;
 
+  trackEvent('support_navi_open');
+
   renderPrefectures();
   renderChoices('family-options', FAMILY_OPTIONS, 'family', 'radio');
   renderChoices('scene-options', SCENE_OPTIONS, 'scene', 'radio');
@@ -69,6 +71,13 @@ function initAppPage() {
     const data = collectAnswers();
     if (!data) return;
     sessionStorage.setItem(ANSWER_KEY, JSON.stringify(data));
+    trackEvent('support_navi_submit', {
+      prefecture: data.prefecture,
+      family: data.family,
+      scene: data.scene,
+      detail_count: data.details.length,
+      local_links: data.showLocalLinks,
+    });
     window.location.href = 'result.html';
   });
 }
@@ -174,6 +183,11 @@ function escapeHtml(value) {
 
 function escapeAttr(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function trackEvent(name, params = {}) {
+  if (typeof window.gtag !== 'function') return;
+  window.gtag('event', name, params);
 }
 
 document.addEventListener('DOMContentLoaded', initAppPage);
