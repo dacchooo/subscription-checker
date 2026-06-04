@@ -1,0 +1,24 @@
+{
+  "lastVerified": "2026-06-04",
+  "sources": [
+    {
+      "name": "J-FLEC 金融経済教育推進機構",
+      "url": "https://www.j-flec.go.jp/"
+    },
+    {
+      "name": "金融庁 金融経済教育について",
+      "url": "https://www.fsa.go.jp/teach/kyouiku.html"
+    },
+    {
+      "name": "日本FP協会 ライフプラン診断",
+      "url": "https://www.jafp.or.jp/know/lifeplan/simulation/"
+    }
+  ],
+  "defaultEvents": [
+    { "name": "教育費", "age": 45, "amountMan": 100, "type": "expense" },
+    { "name": "車・家電", "age": 50, "amountMan": 150, "type": "expense" },
+    { "name": "住宅修繕", "age": 55, "amountMan": 200, "type": "expense" },
+    { "name": "旅行・帰省", "age": 60, "amountMan": 80, "type": "expense" },
+    { "name": "退職金・臨時収入", "age": 65, "amountMan": 0, "type": "income" }
+  ]
+}

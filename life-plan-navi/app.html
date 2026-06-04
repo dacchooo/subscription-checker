@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>入力｜ライフプラン表メーカー</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0f9f7a">
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LYNYEMRMWH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LYNYEMRMWH');
+  </script>
+</head>
+<body>
+  <main class="shell shell--narrow">
+    <header class="topbar">
+      <a href="index.html">トップ</a>
+      <strong>ライフプラン表</strong>
+      <a href="result.html">結果</a>
+    </header>
+
+    <section class="card">
+      <div class="speech">
+        <img src="images/characters/dacchooo.png" alt="だっちょ">
+        <div class="speech__bubble">まずはざっくりでOK。あとから条件を変えながら「どこが不安か」を見つけていきましょう。</div>
+      </div>
+    </section>
+
+    <form id="life-form" class="stack">
+      <section class="card form-section">
+        <h2>1. 基本情報</h2>
+        <div class="grid grid--2">
+          <label>
+            <span>今の年齢</span>
+            <input id="current-age" name="currentAge" type="number" min="18" max="80" inputmode="numeric" value="35" required>
+          </label>
+          <label>
+            <span>何歳まで見る？</span>
+            <input id="end-age" name="endAge" type="number" min="30" max="100" inputmode="numeric" value="70" required>
+          </label>
+        </div>
+        <div class="grid grid--2">
+          <label>
+            <span>今ある貯金・投資</span>
+            <div class="money-input">
+              <input id="current-assets" name="currentAssets" type="number" min="0" max="30000" inputmode="numeric" value="200" required>
+              <small>万円</small>
+            </div>
+          </label>
+          <label>
+            <span>想定する年利</span>
+            <div class="money-input">
+              <input id="return-rate" name="returnRate" type="number" min="-10" max="10" step="0.1" inputmode="decimal" value="0">
+              <small>%</small>
+            </div>
+          </label>
+        </div>
+        <p class="hint">年利は仮定です。0%なら運用益を見込まない表になります。</p>
+      </section>
+
+      <section class="card form-section">
+        <h2>2. 毎月の家計</h2>
+        <div class="grid grid--2">
+          <label>
+            <span>手取り収入</span>
+            <div class="money-input">
+              <input id="monthly-income" name="monthlyIncome" type="number" min="0" max="500" inputmode="numeric" value="35" required>
+              <small>万円/月</small>
+            </div>
+          </label>
+          <label>
+            <span>生活費・固定費</span>
+            <div class="money-input">
+              <input id="monthly-expense" name="monthlyExpense" type="number" min="0" max="500" inputmode="numeric" value="28" required>
+              <small>万円/月</small>
+            </div>
+          </label>
+        </div>
+        <div class="grid grid--2">
+          <label>
+            <span>年1回の収入</span>
+            <div class="money-input">
+              <input id="annual-income" name="annualIncome" type="number" min="0" max="3000" inputmode="numeric" value="0">
+              <small>万円/年</small>
+            </div>
+          </label>
+          <label>
+            <span>年1回の支出</span>
+            <div class="money-input">
+              <input id="annual-expense" name="annualExpense" type="number" min="0" max="3000" inputmode="numeric" value="0">
+              <small>万円/年</small>
+            </div>
+          </label>
+        </div>
+        <p class="hint">ボーナス、固定資産税、帰省費、年払い保険料などをざっくり入れられます。</p>
+      </section>
+
+      <section class="card form-section">
+        <h2>3. 定年後の家計</h2>
+        <div class="grid grid--2">
+          <label>
+            <span>定年・退職予定年齢</span>
+            <input id="retirement-age" name="retirementAge" type="number" min="30" max="90" inputmode="numeric" value="65" required>
+          </label>
+          <label>
+            <span>老後の月収</span>
+            <div class="money-input">
+              <input id="retired-income" name="retiredIncome" type="number" min="0" max="500" inputmode="numeric" value="18" required>
+              <small>万円/月</small>
+            </div>
+          </label>
+        </div>
+        <div class="grid grid--2">
+          <label>
+            <span>老後の生活費</span>
+            <div class="money-input">
+              <input id="retired-expense" name="retiredExpense" type="number" min="0" max="500" inputmode="numeric" value="25" required>
+              <small>万円/月</small>
+            </div>
+          </label>
+          <label>
+            <span>老後の年1回支出</span>
+            <div class="money-input">
+              <input id="retired-annual-expense" name="retiredAnnualExpense" type="number" min="0" max="3000" inputmode="numeric" value="0">
+              <small>万円/年</small>
+            </div>
+          </label>
+        </div>
+        <p class="hint">年金額は人によって変わるため、ここでは「老後の月収」としてざっくり入力してください。</p>
+      </section>
+
+      <section class="card form-section">
+        <h2>4. 将来イベント</h2>
+        <p class="hint">使わない行は金額を0にしてください。支出はプラス、臨時収入はマイナスではなく「種類」で選びます。</p>
+        <div id="event-list" class="event-list"></div>
+      </section>
+
+      <section class="card alert">
+        <h2>試算の注意</h2>
+        <p>この表は入力内容にもとづく一般的な試算です。将来の収入、支出、運用成果、税金、年金額などを保証するものではありません。</p>
+      </section>
+
+      <button class="button button--primary button--full" type="submit">ライフプラン表を見る</button>
+    </form>
+
+    <footer class="footer">
+      <a href="about.html">運営者情報</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="terms.html">利用規約</a>
+    </footer>
+  </main>
+  <script src="js/app.js?v=2"></script>
+</body>
+</html>
