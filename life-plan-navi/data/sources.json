@@ -1,6 +1,14 @@
 {
-  "lastVerified": "2026-06-04",
+  "lastVerified": "2026-08-03",
   "sources": [
+    {
+      "name": "文部科学省 子供の学習費調査（教育費目安の出典）",
+      "url": "https://www.mext.go.jp/b_menu/toukei/chousa03/gakushuuhi/1268091.htm"
+    },
+    {
+      "name": "日本政策金融公庫 教育費負担の実態調査（大学費用の出典）",
+      "url": "https://www.jfc.go.jp/n/findings/kyoiku_kekka_m_index.html"
+    },
     {
       "name": "J-FLEC 金融経済教育推進機構",
       "url": "https://www.j-flec.go.jp/"
@@ -15,10 +23,9 @@
     }
   ],
   "defaultEvents": [
-    { "name": "教育費", "age": 45, "amountMan": 100, "type": "expense" },
-    { "name": "車・家電", "age": 50, "amountMan": 150, "type": "expense" },
-    { "name": "住宅修繕", "age": 55, "amountMan": 200, "type": "expense" },
-    { "name": "旅行・帰省", "age": 60, "amountMan": 80, "type": "expense" },
-    { "name": "退職金・臨時収入", "age": 65, "amountMan": 0, "type": "income" }
+    { "name": "車・家電の買い替え", "age": 50, "amountMan": 150, "years": 1, "type": "expense" },
+    { "name": "住宅修繕", "age": 55, "amountMan": 200, "years": 1, "type": "expense" },
+    { "name": "旅行・帰省", "age": 60, "amountMan": 80, "years": 1, "type": "expense" },
+    { "name": "臨時収入", "age": 65, "amountMan": 0, "years": 1, "type": "income" }
   ]
 }

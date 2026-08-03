@@ -6,7 +6,7 @@
   <title>入力｜ライフプラン表メーカー</title>
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0f9f7a">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=4">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LYNYEMRMWH"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -26,7 +26,7 @@
     <section class="card">
       <div class="speech">
         <img src="images/characters/dacchooo.png" alt="だっちょ">
-        <div class="speech__bubble">まずはざっくりでOK。あとから条件を変えながら「どこが不安か」を見つけていきましょう。</div>
+        <div class="speech__bubble">まずはざっくりでOK。家族・住まい・教育費まで入れると、FP相談で使うキャッシュフロー表に近づきます。</div>
       </div>
     </section>
 
@@ -40,42 +40,105 @@
           </label>
           <label>
             <span>何歳まで見る？</span>
-            <input id="end-age" name="endAge" type="number" min="30" max="100" inputmode="numeric" value="70" required>
+            <input id="end-age" name="endAge" type="number" min="30" max="100" inputmode="numeric" value="90" required>
           </label>
         </div>
+      </section>
+
+      <section class="card form-section">
+        <h2>2. 家族</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="spouse-enabled" name="spouseEnabled">
+          <span>配偶者・パートナーの収入も合算する</span>
+        </label>
+        <div id="spouse-fields" class="is-hidden">
+          <div class="grid grid--2">
+            <label>
+              <span>配偶者の年齢</span>
+              <input id="spouse-age" name="spouseAge" type="number" min="18" max="90" inputmode="numeric" value="35">
+            </label>
+            <label>
+              <span>配偶者の手取り月収</span>
+              <div class="money-input">
+                <input id="spouse-income" name="spouseIncome" type="number" min="0" max="500" inputmode="numeric" value="10">
+                <small>万円/月</small>
+              </div>
+            </label>
+          </div>
+          <div class="grid grid--2">
+            <label>
+              <span>配偶者の退職年齢</span>
+              <input id="spouse-retire-age" name="spouseRetireAge" type="number" min="30" max="90" inputmode="numeric" value="65">
+            </label>
+            <label>
+              <span>配偶者の年金（開始65歳）</span>
+              <div class="money-input">
+                <input id="spouse-pension" name="spousePension" type="number" min="0" max="100" inputmode="numeric" value="7">
+                <small>万円/月</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <h3>子どもの教育費（自動計算）</h3>
+        <p class="hint">進路を選ぶと、国の統計にもとづく年間目安額を教育費として自動で組み込みます（金額の出典は結果ページに記載）。</p>
+        <div id="child-list" class="event-list"></div>
+        <div class="actions">
+          <button class="button button--ghost" type="button" id="add-child">＋ 子どもを追加する（最大4人）</button>
+        </div>
+      </section>
+
+      <section class="card form-section">
+        <h2>3. いまの資産</h2>
         <div class="grid grid--2">
           <label>
-            <span>今ある貯金・投資</span>
+            <span>現金・預金</span>
             <div class="money-input">
-              <input id="current-assets" name="currentAssets" type="number" min="0" max="30000" inputmode="numeric" value="200" required>
+              <input id="cash" name="cash" type="number" min="0" max="30000" inputmode="numeric" value="200" required>
               <small>万円</small>
             </div>
           </label>
           <label>
-            <span>想定する年利</span>
+            <span>投資資産（NISAなど）</span>
+            <div class="money-input">
+              <input id="invest" name="invest" type="number" min="0" max="30000" inputmode="numeric" value="0">
+              <small>万円</small>
+            </div>
+          </label>
+        </div>
+        <div class="grid grid--2">
+          <label>
+            <span>投資の想定年利</span>
             <div class="money-input">
               <input id="return-rate" name="returnRate" type="number" min="-10" max="10" step="0.1" inputmode="decimal" value="0">
               <small>%</small>
             </div>
           </label>
+          <label>
+            <span>毎月の積立投資額</span>
+            <div class="money-input">
+              <input id="monthly-invest" name="monthlyInvest" type="number" min="0" max="100" step="0.5" inputmode="decimal" value="0">
+              <small>万円/月</small>
+            </div>
+          </label>
         </div>
-        <p class="hint">年利は仮定です。0%なら運用益を見込まない表になります。</p>
+        <p class="hint">年利は投資資産にだけかかります。現金・預金は増えない前提です。積立は定年まで続く想定で、毎月の収支から投資に回します。</p>
       </section>
 
       <section class="card form-section">
-        <h2>2. 毎月の家計</h2>
+        <h2>4. 毎月の家計（現役のあいだ）</h2>
         <div class="grid grid--2">
           <label>
-            <span>手取り収入</span>
+            <span>本人の手取り収入</span>
             <div class="money-input">
               <input id="monthly-income" name="monthlyIncome" type="number" min="0" max="500" inputmode="numeric" value="35" required>
               <small>万円/月</small>
             </div>
           </label>
           <label>
-            <span>生活費・固定費</span>
+            <span>生活費（住居費をのぞく）</span>
             <div class="money-input">
-              <input id="monthly-expense" name="monthlyExpense" type="number" min="0" max="500" inputmode="numeric" value="28" required>
+              <input id="monthly-expense" name="monthlyExpense" type="number" min="0" max="500" inputmode="numeric" value="20" required>
               <small>万円/月</small>
             </div>
           </label>
@@ -96,32 +159,103 @@
             </div>
           </label>
         </div>
-        <p class="hint">ボーナス、固定資産税、帰省費、年払い保険料などをざっくり入れられます。</p>
+        <p class="hint">生活費には家賃・住宅ローンを入れないでください（次のセクションで分けて入力します）。教育費も自動計算されるので不要です。</p>
       </section>
 
       <section class="card form-section">
-        <h2>3. 定年後の家計</h2>
+        <h2>5. 住まい</h2>
+        <label>
+          <span>住居費のタイプ</span>
+          <select id="housing-type" name="housingType">
+            <option value="none">生活費に含めている（分けない）</option>
+            <option value="rent">賃貸（家賃を払っている）</option>
+            <option value="loan">持ち家（住宅ローン返済中）</option>
+          </select>
+        </label>
+        <div id="housing-rent-fields" class="is-hidden">
+          <div class="grid grid--2">
+            <label>
+              <span>家賃・管理費</span>
+              <div class="money-input">
+                <input id="housing-monthly-rent" name="housingMonthlyRent" type="number" min="0" max="200" step="0.5" inputmode="decimal" value="8">
+                <small>万円/月</small>
+              </div>
+            </label>
+          </div>
+          <p class="hint">家賃は物価上昇率にあわせて少しずつ上がる計算です。</p>
+        </div>
+        <div id="housing-loan-fields" class="is-hidden">
+          <div class="grid grid--2">
+            <label>
+              <span>毎月のローン返済額</span>
+              <div class="money-input">
+                <input id="housing-monthly-loan" name="housingMonthlyLoan" type="number" min="0" max="200" step="0.5" inputmode="decimal" value="10">
+                <small>万円/月</small>
+              </div>
+            </label>
+            <label>
+              <span>完済する年齢</span>
+              <input id="housing-loan-end" name="housingLoanEndAge" type="number" min="18" max="100" inputmode="numeric" value="65">
+            </label>
+          </div>
+          <div class="grid grid--2">
+            <label>
+              <span>完済後の住居費（管理費・税など）</span>
+              <div class="money-input">
+                <input id="housing-after" name="housingAfter" type="number" min="0" max="100" step="0.5" inputmode="decimal" value="2">
+                <small>万円/月</small>
+              </div>
+            </label>
+          </div>
+          <p class="hint">ローン返済額は完済まで固定、完済後は管理費・固定資産税などだけが残る計算です。ボーナス返済分は「年1回の支出」に入れてください。</p>
+        </div>
+      </section>
+
+      <section class="card form-section">
+        <h2>6. 定年と年金（本人）</h2>
         <div class="grid grid--2">
           <label>
             <span>定年・退職予定年齢</span>
             <input id="retirement-age" name="retirementAge" type="number" min="30" max="90" inputmode="numeric" value="65" required>
           </label>
           <label>
-            <span>老後の月収</span>
+            <span>退職金（見込み）</span>
             <div class="money-input">
-              <input id="retired-income" name="retiredIncome" type="number" min="0" max="500" inputmode="numeric" value="18" required>
+              <input id="severance" name="severance" type="number" min="0" max="30000" inputmode="numeric" value="0">
+              <small>万円</small>
+            </div>
+          </label>
+        </div>
+        <div class="grid grid--2">
+          <label>
+            <span>年金の開始年齢</span>
+            <input id="pension-age" name="pensionAge" type="number" min="40" max="90" inputmode="numeric" value="65" required>
+          </label>
+          <label>
+            <span>年金の月額（手取り）</span>
+            <div class="money-input">
+              <input id="pension" name="pension" type="number" min="0" max="100" inputmode="numeric" value="14" required>
               <small>万円/月</small>
             </div>
           </label>
         </div>
         <div class="grid grid--2">
           <label>
-            <span>老後の生活費</span>
+            <span>定年後〜年金までの月収</span>
             <div class="money-input">
-              <input id="retired-expense" name="retiredExpense" type="number" min="0" max="500" inputmode="numeric" value="25" required>
+              <input id="bridge-income" name="bridgeIncome" type="number" min="0" max="500" inputmode="numeric" value="0">
               <small>万円/月</small>
             </div>
           </label>
+          <label>
+            <span>老後の生活費（住居費のぞく）</span>
+            <div class="money-input">
+              <input id="retired-expense" name="retiredExpense" type="number" min="0" max="500" inputmode="numeric" value="18" required>
+              <small>万円/月</small>
+            </div>
+          </label>
+        </div>
+        <div class="grid grid--2">
           <label>
             <span>老後の年1回支出</span>
             <div class="money-input">
@@ -130,18 +264,45 @@
             </div>
           </label>
         </div>
-        <p class="hint">年金額は人によって変わるため、ここでは「老後の月収」としてざっくり入力してください。</p>
+        <p class="hint">定年より年金開始が遅い場合、そのあいだは「定年後〜年金までの月収」（再雇用・パートなど）だけで暮らす試算になります。年金額の目安は「ねんきん定期便」やねんきんネットで確認できます。</p>
       </section>
 
       <section class="card form-section">
-        <h2>4. 将来イベント</h2>
-        <p class="hint">使わない行は金額を0にしてください。支出はプラス、臨時収入はマイナスではなく「種類」で選びます。</p>
+        <h2>7. 詳細設定</h2>
+        <details class="advanced">
+          <summary>物価上昇率・昇給率を変える（開かなくてもOK）</summary>
+          <div class="grid grid--2">
+            <label>
+              <span>物価上昇率（インフレ）</span>
+              <div class="money-input">
+                <input id="inflation-rate" name="inflationRate" type="number" min="0" max="5" step="0.1" inputmode="decimal" value="1.0">
+                <small>%/年</small>
+              </div>
+            </label>
+            <label>
+              <span>手取りの昇給率</span>
+              <div class="money-input">
+                <input id="raise-rate" name="raiseRate" type="number" min="0" max="10" step="0.1" inputmode="decimal" value="0">
+                <small>%/年</small>
+              </div>
+            </label>
+          </div>
+          <p class="hint">物価上昇率のぶんだけ、生活費・家賃が毎年少しずつ増える計算になります。日銀の物価目標は2%ですが、控えめに1%を初期値にしています。昇給率は本人・配偶者の手取りに退職まで毎年かかります。</p>
+        </details>
+      </section>
+
+      <section class="card form-section">
+        <h2>8. 将来イベント</h2>
+        <p class="hint">「継続年数」を2年以上にすると、その年齢から毎年同じ金額がかかる計算になります。教育費は自動計算されるので、ここに入れなくてOKです。使わない行は金額を0にしてください。</p>
         <div id="event-list" class="event-list"></div>
+        <div class="actions">
+          <button class="button button--ghost" type="button" id="add-event">＋ イベントを追加する</button>
+        </div>
       </section>
 
       <section class="card alert">
         <h2>試算の注意</h2>
-        <p>この表は入力内容にもとづく一般的な試算です。将来の収入、支出、運用成果、税金、年金額などを保証するものではありません。</p>
+        <p>この表は入力内容にもとづく一般的な試算です。教育費の目安は国の統計調査の平均値であり、実際の金額は進路や学校によって大きく変わります。将来の収入、支出、運用成果、税金、年金額などを保証するものではありません。</p>
       </section>
 
       <button class="button button--primary button--full" type="submit">ライフプラン表を見る</button>
@@ -153,6 +314,6 @@
       <a href="terms.html">利用規約</a>
     </footer>
   </main>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>
