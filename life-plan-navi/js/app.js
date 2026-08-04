@@ -17,6 +17,23 @@ const EDU_COST = {
   awayAnnual: 96,
 };
 
+// イベントのプリセット（選ぶと目安金額・年数・種類を自動セット。金額は編集可）
+const EVENT_PRESETS = [
+  { name: '車の買い替え', amountMan: 200, years: 1, type: 'expense' },
+  { name: '家電の買い替え', amountMan: 30, years: 1, type: 'expense' },
+  { name: '住宅購入の頭金', amountMan: 300, years: 1, type: 'expense' },
+  { name: '住宅修繕・リフォーム', amountMan: 200, years: 1, type: 'expense' },
+  { name: '引っ越し', amountMan: 50, years: 1, type: 'expense' },
+  { name: '結婚式・新婚旅行', amountMan: 300, years: 1, type: 'expense' },
+  { name: '出産・育児用品', amountMan: 50, years: 1, type: 'expense' },
+  { name: '旅行・帰省', amountMan: 80, years: 1, type: 'expense' },
+  { name: 'ペットのお迎え・医療', amountMan: 30, years: 1, type: 'expense' },
+  { name: '親の介護への備え', amountMan: 500, years: 1, type: 'expense' },
+  { name: '医療・入院への備え', amountMan: 100, years: 1, type: 'expense' },
+  { name: '相続・贈与などの臨時収入', amountMan: 0, years: 1, type: 'income' },
+];
+const CUSTOM_EVENT = '__custom__';
+
 const SCHOOL_PATTERNS = {
   allPublic: { label: 'オール公立', elem: 'public', jhs: 'public', hs: 'public' },
   highPrivate: { label: '高校から私立', elem: 'public', jhs: 'public', hs: 'private' },
@@ -110,10 +127,9 @@ async function loadDataWithFallback() {
       lastVerified: '2026-08-03',
       sources: [],
       defaultEvents: [
-        { name: '車・家電の買い替え', age: 50, amountMan: 150, years: 1, type: 'expense' },
-        { name: '住宅修繕', age: 55, amountMan: 200, years: 1, type: 'expense' },
+        { name: '車の買い替え', age: 50, amountMan: 200, years: 1, type: 'expense' },
+        { name: '住宅修繕・リフォーム', age: 55, amountMan: 200, years: 1, type: 'expense' },
         { name: '旅行・帰省', age: 60, amountMan: 80, years: 1, type: 'expense' },
-        { name: '臨時収入', age: 65, amountMan: 0, years: 1, type: 'income' },
       ],
     };
   }
@@ -287,10 +303,20 @@ function appendEventRow(eventItem) {
   if (!root) return;
   const row = document.createElement('div');
   row.className = 'event-row';
+  const isPreset = EVENT_PRESETS.some((p) => p.name === eventItem.name);
+  const isCustom = !!eventItem.name && !isPreset;
   row.innerHTML = `
     <label>
       <span>イベント名</span>
-      <input data-event="name" type="text" value="${escapeAttr(eventItem.name)}">
+      <select data-event="name-select">
+        <option value="" ${!eventItem.name ? 'selected' : ''}>選んでください</option>
+        ${EVENT_PRESETS.map((p) => `<option value="${escapeAttr(p.name)}" ${eventItem.name === p.name ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+        <option value="${CUSTOM_EVENT}" ${isCustom ? 'selected' : ''}>その他（自由入力）</option>
+      </select>
+    </label>
+    <label class="event-custom-name ${isCustom ? '' : 'is-hidden'}">
+      <span>イベント名（自由入力）</span>
+      <input data-event="custom-name" type="text" value="${escapeAttr(isCustom ? eventItem.name : '')}">
     </label>
     <label>
       <span>年齢</span>
@@ -324,6 +350,18 @@ function appendEventRow(eventItem) {
     updateAddButton();
     updateEventTally();
   });
+  row.querySelector('[data-event="name-select"]').addEventListener('change', (event) => {
+    const value = event.target.value;
+    row.querySelector('.event-custom-name').classList.toggle('is-hidden', value !== CUSTOM_EVENT);
+    const preset = EVENT_PRESETS.find((p) => p.name === value);
+    if (preset) {
+      const amountInput = row.querySelector('[data-event="amount"]');
+      if (!Number(amountInput.value)) amountInput.value = preset.amountMan;
+      row.querySelector('[data-event="years"]').value = preset.years;
+      row.querySelector('[data-event="type"]').value = preset.type;
+    }
+    updateEventTally();
+  });
   root.appendChild(row);
 }
 
@@ -353,7 +391,10 @@ function updateEventTally() {
 
 function collectEvents() {
   return [...document.querySelectorAll('#event-list .event-row')].map((row) => {
-    const name = row.querySelector('[data-event="name"]').value.trim();
+    const selected = row.querySelector('[data-event="name-select"]').value;
+    const name = selected === CUSTOM_EVENT
+      ? row.querySelector('[data-event="custom-name"]').value.trim()
+      : selected;
     const age = Number(row.querySelector('[data-event="age"]').value);
     const amountMan = Number(row.querySelector('[data-event="amount"]').value || 0);
     const years = Math.max(1, Math.min(30, Math.round(Number(row.querySelector('[data-event="years"]').value || 1))));

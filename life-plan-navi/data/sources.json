@@ -23,9 +23,8 @@
     }
   ],
   "defaultEvents": [
-    { "name": "車・家電の買い替え", "age": 50, "amountMan": 150, "years": 1, "type": "expense" },
-    { "name": "住宅修繕", "age": 55, "amountMan": 200, "years": 1, "type": "expense" },
-    { "name": "旅行・帰省", "age": 60, "amountMan": 80, "years": 1, "type": "expense" },
-    { "name": "臨時収入", "age": 65, "amountMan": 0, "years": 1, "type": "income" }
+    { "name": "車の買い替え", "age": 50, "amountMan": 200, "years": 1, "type": "expense" },
+    { "name": "住宅修繕・リフォーム", "age": 55, "amountMan": 200, "years": 1, "type": "expense" },
+    { "name": "旅行・帰省", "age": 60, "amountMan": 80, "years": 1, "type": "expense" }
   ]
 }

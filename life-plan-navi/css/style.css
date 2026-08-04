@@ -298,6 +298,10 @@ select:focus {
   grid-template-columns: 1fr 1fr;
 }
 
+.event-row .event-custom-name {
+  grid-column: 1 / -1;
+}
+
 .event-row {
   display: grid;
   grid-template-columns: 1.2fr 0.6fr 0.9fr 0.7fr 0.8fr auto;
