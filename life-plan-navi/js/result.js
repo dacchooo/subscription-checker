@@ -189,7 +189,10 @@ function renderResults(root, answers, rows, data) {
   const hasChildren = (answers.children || []).length > 0;
   const hasHousing = answers.housingType !== 'none';
   const compare = readCompare();
-  const sampledRows = sampleRows(rows);
+
+  const headlineTile = negativeRows.length > 0
+    ? `<div class="summary-item summary-item--full summary-item--danger">⚠️ ${minRow.age}歳で残高が最低（<strong class="is-worse">${formatMan(minRow.balance)}</strong>）。マイナスは${negativeRows.length}年間あります。</div>`
+    : `<div class="summary-item summary-item--full summary-item--ok">✅ 最後まで残高プラス（一番少ないのは${minRow.age}歳の<strong class="is-better">${formatMan(minRow.balance)}</strong>）。</div>`;
 
   root.innerHTML = `
     <section class="card result-hero">
@@ -210,14 +213,12 @@ function renderResults(root, answers, rows, data) {
     <section class="card">
       <h2>サマリー</h2>
       <div class="summary-grid">
-        <div class="summary-item"><span>直近の年間収支</span><strong>${formatMan(firstYearRow.annualCashflow)}</strong></div>
-        <div class="summary-item"><span>年金期の年間収支</span><strong>${formatMan(pensionRow.annualCashflow)}</strong></div>
-        <div class="summary-item"><span>一番少ない年齢</span><strong>${minRow.age}歳</strong></div>
-        <div class="summary-item"><span>最低残高</span><strong>${formatMan(minRow.balance)}</strong></div>
-        <div class="summary-item"><span>不足年数</span><strong>${negativeRows.length}年</strong></div>
+        ${headlineTile}
+        <div class="summary-item"><span>直近の年間収支</span><strong class="${firstYearRow.annualCashflow < 0 ? 'is-worse' : ''}">${formatMan(firstYearRow.annualCashflow)}</strong></div>
+        <div class="summary-item"><span>年金期の年間収支</span><strong class="${pensionRow.annualCashflow < 0 ? 'is-worse' : ''}">${formatMan(pensionRow.annualCashflow)}</strong></div>
         ${hasChildren ? `<div class="summary-item"><span>教育費の合計（目安）</span><strong>${formatMan(educationTotal)}</strong></div>` : ''}
       </div>
-      <p class="note">年間収支には物価上昇・昇給を織り込んでいます。年金期の値は年金開始の翌年時点です。</p>
+      <p class="note">年間収支は収入−支出（イベント・退職金をのぞく）。物価上昇・昇給を織り込んでいます。年金期の値は年金開始の翌年時点です。</p>
     </section>
 
     <section class="card">
@@ -232,64 +233,67 @@ function renderResults(root, answers, rows, data) {
       <p class="note">点線（縦）は定年・退職予定年齢です。</p>
     </section>
 
-    <section class="card">
-      <h2>年間収支グラフ</h2>
-      ${renderCashflowChart(rows)}
-      <p class="note">イベント・退職金を含む、その年に増えた／減ったお金です。</p>
-    </section>
-
-    ${renderCompareSection(compare, finalRow, minRow, answers)}
-
-    <section class="card">
-      <h2>資産推移の目安</h2>
-      <div class="chart">
-        ${sampledRows.map((row) => renderBar(row, rows)).join('')}
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>キャッシュフロー表</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>西暦</th>
-              <th>年齢</th>
-              <th>区分</th>
-              <th>イベント</th>
-              <th>本人収入</th>
-              ${hasSpouse ? '<th>配偶者収入</th>' : ''}
-              <th>年金</th>
-              <th>生活費</th>
-              ${hasHousing ? '<th>住居費</th>' : ''}
-              ${hasChildren ? '<th>教育費</th>' : ''}
-              <th>イベント収支</th>
-              <th>年間収支</th>
-              <th>現金・預金</th>
-              <th>投資資産</th>
-              <th>年末残高</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map((row) => renderTableRow(row, hasSpouse, hasHousing, hasChildren)).join('')}
-          </tbody>
-        </table>
-      </div>
-      <p class="note">現金が足りない年は投資資産を取り崩す前提です。年間収支は収入合計−支出合計（イベントのぞく）、イベント収支には退職金を含みます。${hasChildren ? '教育費は文部科学省「子供の学習費調査」・日本政策金融公庫「教育費負担の実態調査」の平均値をもとにした目安です。' : ''}</p>
-    </section>
-
     <section class="card alert">
       <h2>確認しておきたいこと</h2>
       <p>${renderAdvice(negativeRows, firstYearRow.annualCashflow, hasBridgeGap, answers)}</p>
     </section>
 
     <section class="card no-print">
-      <h2>このプランを保存・出力する</h2>
+      <h2>次にやること</h2>
       <div class="actions">
+        <a class="button button--primary" href="app.html">✏️ 条件を変えて再計算する</a>
         <button class="button button--ghost" type="button" id="save-compare">📌 このプランを比較用に保存する</button>
         <button class="button button--ghost" type="button" id="print-report">🖨 レポートとして印刷・PDF保存</button>
       </div>
-      <p class="note">保存したあと入力に戻って条件を変えると、グラフに前のプランが重なって表示され、改善効果を比べられます（保存はこのブラウザを閉じるまで）。</p>
+      <p class="note">保存したあと条件を変えると、グラフに前のプランが重なって表示され、改善効果を比べられます（保存はこのブラウザを閉じるまで）。</p>
+    </section>
+
+    <section class="card">
+      <h2>毎年の黒字・赤字</h2>
+      ${renderCashflowChart(rows)}
+      <div class="legend">
+        <span class="legend-item"><i class="legend-swatch" style="background:#34d399"></i>黒字（増えた年）</span>
+        <span class="legend-item"><i class="legend-swatch" style="background:#f87171"></i>赤字（減った年）</span>
+      </div>
+      <p class="note">退職金・イベントも含めた、その年の実際の増減です。</p>
+    </section>
+
+    ${renderCompareSection(compare, finalRow, minRow, answers)}
+
+    <section class="card">
+      <h2>キャッシュフロー表</h2>
+      <details class="advanced">
+        <summary>年ごとの詳細表を見る（${rows.length}年分）</summary>
+        <p class="note">→ 表は横にスワイプできます。左端の年齢は固定表示です。</p>
+        <div class="scroll-outer">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>年齢</th>
+                  <th>区分</th>
+                  <th>イベント</th>
+                  <th>本人収入</th>
+                  ${hasSpouse ? '<th>配偶者収入</th>' : ''}
+                  <th>年金</th>
+                  <th>生活費</th>
+                  ${hasHousing ? '<th>住居費</th>' : ''}
+                  ${hasChildren ? '<th>教育費</th>' : ''}
+                  <th>イベント収支</th>
+                  <th>年間収支</th>
+                  <th>現金・預金</th>
+                  <th>投資資産</th>
+                  <th>年末残高</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((row) => renderTableRow(row, hasSpouse, hasHousing, hasChildren)).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+      <p class="note">現金が足りない年は投資資産を取り崩す前提です。イベント収支には退職金を含みます。${hasChildren ? '教育費は文部科学省「子供の学習費調査」・日本政策金融公庫「教育費負担の実態調査」の平均値をもとにした目安です。' : ''}</p>
     </section>
 
     <section class="card">
@@ -298,14 +302,6 @@ function renderResults(root, answers, rows, data) {
         ${(data.sources || []).map(renderSourceLink).join('')}
       </div>
       <p class="note">参考リンク確認日：${escapeHtml(data.lastVerified || '2026-08-03')}</p>
-    </section>
-
-    <section class="card no-print">
-      <h2>条件を変えてみる</h2>
-      <p class="note">物価上昇率、年利、進路パターンを少し変えるだけでも結果は大きく変わります。まずは現実に近い数字へ調整してみてください。</p>
-      <div class="actions">
-        <a class="button button--ghost" href="app.html">入力に戻る</a>
-      </div>
     </section>
 
     <footer class="footer">
@@ -324,13 +320,15 @@ function renderResults(root, answers, rows, data) {
         minBalance: minRow.balance,
         balances: rows.map((row) => ({ age: row.age, balance: Math.round(row.balance) })),
       }));
-      saveButton.textContent = '✅ 保存しました（入力に戻って条件を変えてみてください）';
+      saveButton.textContent = '✅ 保存しました';
+      saveButton.insertAdjacentHTML('afterend', '<a class="button button--primary" href="app.html">条件を変えて比べる →</a>');
       trackEvent('life_plan_compare_save', { final_balance_man: Math.round(finalRow.balance) });
     });
   }
   const printButton = document.getElementById('print-report');
   if (printButton) {
     printButton.addEventListener('click', () => {
+      document.querySelectorAll('details').forEach((d) => { d.open = true; });
       trackEvent('life_plan_print', {});
       window.print();
     });
@@ -378,11 +376,39 @@ function renderCompareSection(compare, finalRow, minRow, answers) {
 
 /* ---------- グラフ ---------- */
 
+function niceStep(span) {
+  const steps = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000];
+  for (const step of steps) {
+    if (span / step <= 6) return step;
+  }
+  return 50000;
+}
+
+function renderYGrid(minValue, maxValue, yFor, padX, width) {
+  const step = niceStep(Math.max(1, maxValue - minValue));
+  const lines = [];
+  const start = Math.ceil(minValue / step) * step;
+  for (let value = start; value <= maxValue; value += step) {
+    if (value === 0) continue;
+    const y = yFor(value).toFixed(1);
+    lines.push(`<line class="chart-grid chart-grid--soft" x1="${padX}" y1="${y}" x2="${width - padX}" y2="${y}"></line>`);
+    lines.push(`<text class="chart-label chart-label--grid" x="${padX + 4}" y="${Number(y) - 4}">${formatManShort(value)}</text>`);
+  }
+  return lines.join('');
+}
+
+function renderXAgeLabels(rows, xFor, height) {
+  return rows
+    .filter((row) => row.age % 10 === 0 && row.yearIndex > 0 && row.yearIndex < rows.length - 1)
+    .map((row) => `<text class="chart-label chart-label--x" x="${xFor(row.yearIndex).toFixed(1)}" y="${height - 8}">${row.age}歳</text>`)
+    .join('');
+}
+
 function renderStackedChart(rows, retirementAge, compare) {
   const width = 820;
-  const height = 300;
+  const height = 320;
   const padX = 48;
-  const padY = 28;
+  const padY = 30;
   const balances = rows.map((row) => row.balance);
   const compareBalances = compare ? compare.balances.map((b) => b.balance) : [];
   const minBalance = Math.min(...balances, ...compareBalances, 0);
@@ -398,7 +424,7 @@ function renderStackedChart(rows, retirementAge, compare) {
   const bars = rows.map((row, index) => {
     const x = (xFor(index) - barWidth / 2).toFixed(1);
     if (row.balance < 0) {
-      const h = Math.max(1, zeroY ? (yFor(row.balance) - zeroY) : 1);
+      const h = Math.max(1, yFor(row.balance) - zeroY);
       return `<rect class="bar-negative" x="${x}" y="${zeroY.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${h.toFixed(1)}"></rect>`;
     }
     const cashSafe = Math.max(0, row.cash);
@@ -429,15 +455,16 @@ function renderStackedChart(rows, retirementAge, compare) {
   return `
     <div class="line-chart-wrap" aria-label="資産推移の積み上げグラフ">
       <svg class="line-chart" viewBox="0 0 ${width} ${height}" role="img">
-        <line class="chart-grid" x1="${padX}" y1="${padY}" x2="${padX}" y2="${height - padY}"></line>
-        <line class="chart-grid" x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${width - padX}" y2="${zeroY.toFixed(1)}"></line>
+        ${renderYGrid(minBalance, maxBalance, yFor, padX, width)}
+        <line class="chart-grid chart-grid--zero" x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${width - padX}" y2="${zeroY.toFixed(1)}"></line>
         ${bars}
         ${retirementX !== null ? `<line class="chart-retirement" x1="${retirementX.toFixed(1)}" y1="${padY}" x2="${retirementX.toFixed(1)}" y2="${height - padY}"></line>` : ''}
         ${compareLine}
-        <text class="chart-label" x="${padX}" y="18">${formatMan(maxBalance)}</text>
-        <text class="chart-label" x="${padX}" y="${height - 8}">${formatMan(minBalance)}</text>
+        ${renderXAgeLabels(rows, xFor, height)}
+        <text class="chart-label" x="${padX}" y="20">${formatMan(maxBalance)}</text>
+        ${minBalance < 0 ? `<text class="chart-label" x="${padX}" y="${height - 26}">${formatMan(minBalance)}</text>` : ''}
         <text class="chart-label chart-label--end" x="${width - padX}" y="${height - 8}">${rows[rows.length - 1].age}歳</text>
-        ${retirementX !== null ? `<text class="chart-label chart-label--retirement" x="${retirementX + 6}" y="${padY + 14}">定年 ${retirementAge}歳</text>` : ''}
+        ${retirementX !== null ? `<text class="chart-label chart-label--retirement" x="${retirementX + 6}" y="${padY + 16}">定年 ${retirementAge}歳</text>` : ''}
       </svg>
     </div>
   `;
@@ -445,9 +472,9 @@ function renderStackedChart(rows, retirementAge, compare) {
 
 function renderCashflowChart(rows) {
   const width = 820;
-  const height = 200;
+  const height = 240;
   const padX = 48;
-  const padY = 20;
+  const padY = 24;
   const flows = rows.map((row) => row.annualCashflow + row.eventTotal);
   const minFlow = Math.min(...flows, 0);
   const maxFlow = Math.max(...flows, 50);
@@ -471,31 +498,16 @@ function renderCashflowChart(rows) {
   }).join('');
 
   return `
-    <div class="line-chart-wrap" aria-label="年間収支グラフ">
+    <div class="line-chart-wrap" aria-label="毎年の黒字・赤字グラフ">
       <svg class="line-chart" viewBox="0 0 ${width} ${height}" role="img">
-        <line class="chart-grid" x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${width - padX}" y2="${zeroY.toFixed(1)}"></line>
+        ${renderYGrid(minFlow, maxFlow, yFor, padX, width)}
+        <line class="chart-grid chart-grid--zero" x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${width - padX}" y2="${zeroY.toFixed(1)}"></line>
         ${bars}
-        <text class="chart-label" x="${padX}" y="14">${formatMan(maxFlow)}</text>
-        <text class="chart-label" x="${padX}" y="${height - 4}">${formatMan(minFlow)}</text>
-        <text class="chart-label chart-label--end" x="${width - padX}" y="${height - 4}">${rows[rows.length - 1].age}歳</text>
+        ${renderXAgeLabels(rows, xFor, height)}
+        <text class="chart-label" x="${padX}" y="16">${formatMan(maxFlow)}</text>
+        ${minFlow < 0 ? `<text class="chart-label" x="${padX}" y="${height - 24}">${formatMan(minFlow)}</text>` : ''}
+        <text class="chart-label chart-label--end" x="${width - padX}" y="${height - 8}">${rows[rows.length - 1].age}歳</text>
       </svg>
-    </div>
-  `;
-}
-
-function sampleRows(rows) {
-  const sampled = rows.filter((row) => row.yearIndex === 0 || row.yearIndex % 5 === 0 || row.age === rows[rows.length - 1].age);
-  return [...new Map(sampled.map((row) => [row.age, row])).values()];
-}
-
-function renderBar(row, rows) {
-  const maxAbs = Math.max(...rows.map((item) => Math.abs(item.balance)), 1);
-  const width = Math.max(2, Math.round((Math.abs(row.balance) / maxAbs) * 100));
-  return `
-    <div class="bar-row">
-      <span>${row.age}歳</span>
-      <div class="bar"><span class="${row.balance < 0 ? 'is-negative' : ''}" style="width:${width}%"></span></div>
-      <strong>${formatMan(row.balance)}</strong>
     </div>
   `;
 }
@@ -503,8 +515,7 @@ function renderBar(row, rows) {
 function renderTableRow(row, hasSpouse, hasHousing, hasChildren) {
   return `
     <tr class="${row.balance < 0 ? 'is-negative' : ''}">
-      <td>${row.year}</td>
-      <td>${row.age}歳</td>
+      <td>${row.year}年<br>${row.age}歳</td>
       <td>${escapeHtml(row.phase)}</td>
       <td>${row.eventNames.length > 0 ? escapeHtml(row.eventNames.join(' / ')) : '-'}</td>
       <td>${formatMan(row.myIncome)}</td>
@@ -565,6 +576,12 @@ function formatMan(value) {
   const rounded = Math.round(value);
   const sign = rounded < 0 ? '-' : '';
   return `${sign}${Math.abs(rounded).toLocaleString('ja-JP')}万円`;
+}
+
+function formatManShort(value) {
+  const rounded = Math.round(value);
+  if (Math.abs(rounded) >= 10000) return `${(rounded / 10000).toLocaleString('ja-JP')}億円`;
+  return `${rounded.toLocaleString('ja-JP')}万`;
 }
 
 document.addEventListener('click', (event) => {

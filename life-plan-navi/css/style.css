@@ -300,7 +300,7 @@ select:focus {
 
 .event-row {
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr 1fr 0.8fr 0.9fr;
+  grid-template-columns: 1.2fr 0.6fr 0.9fr 0.7fr 0.8fr auto;
   gap: 8px;
   align-items: end;
   padding: 12px;
@@ -311,6 +311,97 @@ select:focus {
 
 .is-hidden {
   display: none !important;
+}
+
+/* 送信ボタン（sticky） */
+.submit-block {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, var(--bg) 35%);
+}
+
+.submit-block .button {
+  min-height: 56px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.submit-hint {
+  text-align: center;
+  margin: 6px 0 0;
+}
+
+/* 重要ヒント */
+.hint--important {
+  background: var(--primary-soft);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+  color: #065f46;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+/* インラインエラー */
+.is-invalid {
+  border-color: var(--danger) !important;
+  background: var(--danger-soft) !important;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 6px 0 0;
+}
+
+/* ステップチップ・バッジ */
+.form-section h2 {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.step-num {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.step-total {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.badge--optional {
+  background: var(--surface-soft);
+  color: var(--muted);
 }
 
 .toggle-row {
@@ -422,8 +513,10 @@ select:focus {
   .table-wrap { overflow: visible; border: none; }
   table { min-width: 0; width: 100%; font-size: 9px; }
   th, td { padding: 4px 6px; }
-  .line-chart { min-width: 0; }
+  th:first-child, td:first-child { position: static; }
+  .scroll-outer::after { display: none; }
   .line-chart-wrap { overflow: visible; border: none; }
+  .submit-block { position: static; }
 }
 
 .advanced summary {
@@ -506,6 +599,35 @@ select:focus {
   padding: 14px;
 }
 
+.summary-item--full {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.summary-item--danger {
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+  color: #991b1b;
+}
+
+.summary-item--ok {
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+  color: #065f46;
+}
+
+.summary-item strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-item.summary-item--full strong {
+  display: inline;
+  margin-top: 0;
+  font-size: inherit;
+}
+
 .summary-item span,
 .year-card span {
   display: block;
@@ -563,8 +685,28 @@ select:focus {
 .line-chart {
   display: block;
   width: 100%;
-  min-width: 720px;
   height: auto;
+}
+
+.chart-grid--soft {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+.chart-grid--zero {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.chart-label--grid {
+  font-size: 16px;
+  fill: #94a3b8;
+}
+
+.chart-label--x {
+  text-anchor: middle;
+  font-size: 16px;
+  fill: #94a3b8;
 }
 
 .chart-grid {
@@ -594,7 +736,7 @@ select:focus {
 
 .chart-label {
   fill: var(--muted);
-  font-size: 12px;
+  font-size: 20px;
   font-weight: 800;
 }
 
@@ -604,12 +746,47 @@ select:focus {
 
 .chart-label--retirement {
   fill: var(--accent);
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 4px;
+}
+
+.scroll-outer {
+  position: relative;
+}
+
+.scroll-outer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95));
+  pointer-events: none;
+  border-radius: 0 8px 8px 0;
 }
 
 .table-wrap {
   overflow-x: auto;
   border: 1px solid #d8eee7;
   border-radius: 8px;
+}
+
+th:first-child,
+td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #ffffff;
+}
+
+th:first-child {
+  background: #f8fafc;
+}
+
+tr.is-negative td:first-child {
+  background: var(--danger-soft);
 }
 
 table {
@@ -699,9 +876,12 @@ tr.is-negative td {
     padding-top: 28px;
   }
 
-  .grid--2,
-  .summary-grid {
+  .grid--2 {
     grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .event-row {

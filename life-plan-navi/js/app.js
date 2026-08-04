@@ -50,16 +50,34 @@ async function initAppPage() {
   setupFamilyUI();
   setupHousingUI();
   restoreAnswers();
+  updateEventTally();
 
   const addButton = document.getElementById('add-event');
   if (addButton) {
     addButton.addEventListener('click', () => {
-      const count = document.querySelectorAll('#event-list .event-row').length;
-      if (count >= MAX_EVENTS) return;
-      appendEventRow({ name: '', age: 50, amountMan: 0, years: 1, type: 'expense' }, count);
+      if (document.querySelectorAll('#event-list .event-row').length >= MAX_EVENTS) return;
+      appendEventRow({ name: '', age: 50, amountMan: 0, years: 1, type: 'expense' });
       updateAddButton();
+      updateEventTally();
     });
   }
+
+  const eventList = document.getElementById('event-list');
+  if (eventList) {
+    eventList.addEventListener('input', updateEventTally);
+    eventList.addEventListener('change', updateEventTally);
+  }
+
+  // エラー表示は再入力で消す
+  form.addEventListener('input', (event) => {
+    const el = event.target;
+    if (el.classList && el.classList.contains('is-invalid')) {
+      el.classList.remove('is-invalid');
+      const label = el.closest('label');
+      const error = label && label.nextElementSibling;
+      if (error && error.classList.contains('field-error')) error.remove();
+    }
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -101,6 +119,28 @@ async function loadDataWithFallback() {
   }
 }
 
+/* ---------- インラインエラー ---------- */
+
+function clearFieldErrors() {
+  document.querySelectorAll('.field-error').forEach((el) => el.remove());
+  document.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+}
+
+function showFieldError(target, message) {
+  const el = typeof target === 'string' ? document.getElementById(target) : target;
+  if (!el) {
+    alert(message);
+    return;
+  }
+  el.classList.add('is-invalid');
+  const label = el.closest('label') || el;
+  label.insertAdjacentHTML('afterend', `<p class="field-error">${escapeHtml(message)}</p>`);
+  const details = el.closest('details');
+  if (details) details.open = true;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.focus({ preventScroll: true });
+}
+
 /* ---------- 家族 UI ---------- */
 
 function setupFamilyUI() {
@@ -113,7 +153,7 @@ function setupFamilyUI() {
   if (addChild) {
     addChild.addEventListener('click', () => {
       if (document.querySelectorAll('#child-list .child-row').length >= MAX_CHILDREN) return;
-      appendChildRow({ bornAtAge: 30, school: 'allPublic', univ: 'national', away: false });
+      appendChildRow({ nowAge: 5, future: false, school: 'allPublic', univ: 'national', away: false });
       updateChildButton();
     });
   }
@@ -127,11 +167,15 @@ function appendChildRow(child) {
   row.className = 'event-row child-row';
   row.innerHTML = `
     <label>
-      <span>親が何歳のときの子？</span>
+      <span data-child-age-label>${child.future ? '何年後に生まれる予定？' : '子どもの今の年齢'}</span>
       <div class="money-input">
-        <input data-child="bornAtAge" type="number" min="15" max="60" inputmode="numeric" value="${escapeAttr(child.bornAtAge)}">
-        <small>歳</small>
+        <input data-child="ageValue" type="number" min="0" max="30" inputmode="numeric" value="${escapeAttr(child.future ? (child.yearsUntil || 1) : (child.nowAge ?? 5))}">
+        <small data-child-age-unit>${child.future ? '年後' : '歳'}</small>
       </div>
+    </label>
+    <label class="toggle-row toggle-row--compact">
+      <input data-child="future" type="checkbox" ${child.future ? 'checked' : ''}>
+      <span>これから生まれる予定</span>
     </label>
     <label>
       <span>小・中・高の進路</span>
@@ -158,6 +202,15 @@ function appendChildRow(child) {
     row.remove();
     updateChildButton();
   });
+  row.querySelector('[data-child="future"]').addEventListener('change', (event) => {
+    const future = event.target.checked;
+    row.querySelector('[data-child-age-label]').textContent = future ? '何年後に生まれる予定？' : '子どもの今の年齢';
+    row.querySelector('[data-child-age-unit]').textContent = future ? '年後' : '歳';
+    const input = row.querySelector('[data-child="ageValue"]');
+    input.min = future ? 1 : 0;
+    input.max = future ? 20 : 30;
+    if (future && Number(input.value) < 1) input.value = 1;
+  });
   root.appendChild(row);
 }
 
@@ -169,14 +222,30 @@ function updateChildButton() {
   btn.textContent = count >= MAX_CHILDREN ? `子どもは最大${MAX_CHILDREN}人までです` : '＋ 子どもを追加する（最大4人）';
 }
 
-function collectChildren() {
-  return [...document.querySelectorAll('#child-list .child-row')].map((row) => {
-    const bornAtAge = Number(row.querySelector('[data-child="bornAtAge"]').value);
-    const school = row.querySelector('[data-child="school"]').value;
-    const univ = row.querySelector('[data-child="univ"]').value;
-    const away = row.querySelector('[data-child="away"]').checked;
-    return { bornAtAge, school, univ, away };
-  }).filter((child) => Number.isFinite(child.bornAtAge));
+function collectChildren(currentAge) {
+  const rows = [...document.querySelectorAll('#child-list .child-row')];
+  const children = [];
+  for (const row of rows) {
+    const input = row.querySelector('[data-child="ageValue"]');
+    const value = Number(input.value);
+    const future = row.querySelector('[data-child="future"]').checked;
+    if (!Number.isFinite(value)) continue;
+    if (!future && (value < 0 || value > 30)) {
+      showFieldError(input, '子どもの年齢は0〜30歳で入力してください。');
+      return null;
+    }
+    if (future && (value < 1 || value > 20)) {
+      showFieldError(input, '「何年後に生まれる予定？」は1〜20年で入力してください。');
+      return null;
+    }
+    children.push({
+      bornAtAge: future ? currentAge + value : currentAge - value,
+      school: row.querySelector('[data-child="school"]').value,
+      univ: row.querySelector('[data-child="univ"]').value,
+      away: row.querySelector('[data-child="away"]').checked,
+    });
+  }
+  return children;
 }
 
 /* ---------- 住まい UI ---------- */
@@ -187,6 +256,16 @@ function setupHousingUI() {
   const sync = () => {
     document.getElementById('housing-rent-fields').classList.toggle('is-hidden', select.value !== 'rent');
     document.getElementById('housing-loan-fields').classList.toggle('is-hidden', select.value !== 'loan');
+    const hint = document.getElementById('living-hint');
+    if (hint) {
+      if (select.value === 'none') {
+        hint.textContent = '✅ このプランでは家賃・ローンも上の「生活費」に含めて計算します。教育費は自動計算されるので入れないでください。';
+      } else if (select.value === 'rent' || select.value === 'loan') {
+        hint.textContent = '⚠️ 生活費に家賃・ローンは入れないでください（「住まい」で分けて入力します）。教育費は自動計算されるので入れないでください。';
+      } else {
+        hint.textContent = '⚠️ 生活費に家賃・住宅ローンを入れるかどうかは、次の「住まい」の選択で決まります。教育費は自動計算されるので入れないでください。';
+      }
+    }
   };
   select.addEventListener('change', sync);
   sync();
@@ -198,11 +277,12 @@ function renderEvents(events) {
   const root = document.getElementById('event-list');
   if (!root) return;
   root.innerHTML = '';
-  events.forEach((eventItem, index) => appendEventRow(eventItem, index));
+  events.slice(0, MAX_EVENTS).forEach((eventItem) => appendEventRow(eventItem));
   updateAddButton();
+  updateEventTally();
 }
 
-function appendEventRow(eventItem, index) {
+function appendEventRow(eventItem) {
   const root = document.getElementById('event-list');
   if (!root) return;
   const row = document.createElement('div');
@@ -210,34 +290,40 @@ function appendEventRow(eventItem, index) {
   row.innerHTML = `
     <label>
       <span>イベント名</span>
-      <input name="eventName${index}" type="text" value="${escapeAttr(eventItem.name)}">
+      <input data-event="name" type="text" value="${escapeAttr(eventItem.name)}">
     </label>
     <label>
       <span>年齢</span>
-      <input name="eventAge${index}" type="number" min="18" max="100" inputmode="numeric" value="${escapeAttr(eventItem.age)}">
+      <input data-event="age" type="number" min="18" max="100" inputmode="numeric" value="${escapeAttr(eventItem.age)}">
     </label>
     <label>
       <span>金額（年あたり）</span>
       <div class="money-input">
-        <input name="eventAmount${index}" type="number" min="0" max="30000" inputmode="numeric" value="${escapeAttr(eventItem.amountMan)}">
+        <input data-event="amount" type="number" min="0" max="30000" inputmode="numeric" value="${escapeAttr(eventItem.amountMan)}">
         <small>万円</small>
       </div>
     </label>
     <label>
       <span>継続年数</span>
       <div class="money-input">
-        <input name="eventYears${index}" type="number" min="1" max="30" inputmode="numeric" value="${escapeAttr(eventItem.years || 1)}">
+        <input data-event="years" type="number" min="1" max="30" inputmode="numeric" value="${escapeAttr(eventItem.years || 1)}">
         <small>年</small>
       </div>
     </label>
     <label>
       <span>種類</span>
-      <select name="eventType${index}">
+      <select data-event="type">
         <option value="expense" ${eventItem.type === 'expense' ? 'selected' : ''}>支出</option>
         <option value="income" ${eventItem.type === 'income' ? 'selected' : ''}>収入</option>
       </select>
     </label>
+    <button class="button button--ghost button--small" type="button" data-remove-event>削除</button>
   `;
+  row.querySelector('[data-remove-event]').addEventListener('click', () => {
+    row.remove();
+    updateAddButton();
+    updateEventTally();
+  });
   root.appendChild(row);
 }
 
@@ -249,9 +335,37 @@ function updateAddButton() {
   addButton.textContent = count >= MAX_EVENTS ? `イベントは最大${MAX_EVENTS}件までです` : '＋ イベントを追加する';
 }
 
+function updateEventTally() {
+  const tally = document.getElementById('event-tally');
+  if (!tally) return;
+  const events = collectEvents().filter((e) => e.amountMan > 0);
+  if (events.length === 0) {
+    tally.textContent = 'いま試算に入っているイベントはありません。';
+    return;
+  }
+  const expense = events.filter((e) => e.type === 'expense').reduce((s, e) => s + e.amountMan * (e.years || 1), 0);
+  const income = events.filter((e) => e.type === 'income').reduce((s, e) => s + e.amountMan * (e.years || 1), 0);
+  const parts = [];
+  if (expense > 0) parts.push(`支出 計${expense.toLocaleString('ja-JP')}万円`);
+  if (income > 0) parts.push(`収入 計${income.toLocaleString('ja-JP')}万円`);
+  tally.textContent = `📋 イベント${events.length}件（${parts.join('・')}）を試算に織り込み中。不要なら下で削除できます。`;
+}
+
+function collectEvents() {
+  return [...document.querySelectorAll('#event-list .event-row')].map((row) => {
+    const name = row.querySelector('[data-event="name"]').value.trim();
+    const age = Number(row.querySelector('[data-event="age"]').value);
+    const amountMan = Number(row.querySelector('[data-event="amount"]').value || 0);
+    const years = Math.max(1, Math.min(30, Math.round(Number(row.querySelector('[data-event="years"]').value || 1))));
+    const type = row.querySelector('[data-event="type"]').value;
+    return { name, age, amountMan, years, type };
+  }).filter((e) => Number.isFinite(e.age) && Number.isFinite(e.amountMan));
+}
+
 /* ---------- 収集・検証 ---------- */
 
 function collectAnswers() {
+  clearFieldErrors();
   const form = document.getElementById('life-form');
   const formData = new FormData(form);
   const currentAge = Number(formData.get('currentAge'));
@@ -275,23 +389,23 @@ function collectAnswers() {
   const raiseRate = Number(formData.get('raiseRate') || 0);
 
   if (!Number.isFinite(currentAge) || !Number.isFinite(endAge) || endAge <= currentAge) {
-    alert('「何歳まで見る？」は、今の年齢より先の年齢を入力してください。');
+    showFieldError('end-age', '「何歳まで見る？」は、今の年齢より先の年齢を入力してください。');
     return null;
   }
   if (endAge - currentAge > 70) {
-    alert('試算期間は70年以内にしてください。');
+    showFieldError('end-age', '試算期間は70年以内にしてください。');
     return null;
   }
   if (!Number.isFinite(retirementAge) || retirementAge < currentAge || retirementAge > endAge) {
-    alert('定年・退職予定年齢は、今の年齢から試算終了年齢までの範囲で入力してください。');
+    showFieldError('retirement-age', '定年・退職予定年齢は、今の年齢から試算終了年齢までの範囲で入力してください。');
     return null;
   }
   if (!Number.isFinite(pensionAge)) {
-    alert('年金の開始年齢を入力してください。');
+    showFieldError('pension-age', '年金の開始年齢を入力してください。');
     return null;
   }
   if (monthlyInvestMan > monthlyIncomeMan) {
-    alert('毎月の積立投資額が手取り収入を超えています。');
+    showFieldError('monthly-invest', '毎月の積立投資額が手取り収入を超えています。');
     return null;
   }
 
@@ -303,7 +417,7 @@ function collectAnswers() {
     const spouseRetireAge = Number(formData.get('spouseRetireAge'));
     const spousePension = Number(formData.get('spousePension') || 0);
     if (!Number.isFinite(spouseAge) || !Number.isFinite(spouseRetireAge)) {
-      alert('配偶者の年齢と退職年齢を入力してください。');
+      showFieldError('spouse-age', '配偶者の年齢と退職年齢を入力してください。');
       return null;
     }
     spouse = {
@@ -316,16 +430,15 @@ function collectAnswers() {
   }
 
   // 子ども
-  const children = collectChildren();
-  for (const child of children) {
-    if (child.bornAtAge < 15 || child.bornAtAge > 80) {
-      alert('「親が何歳のときの子？」は15〜80歳の範囲で入力してください。');
-      return null;
-    }
-  }
+  const children = collectChildren(currentAge);
+  if (children === null) return null;
 
   // 住まい
-  const housingType = String(formData.get('housingType') || 'none');
+  const housingType = String(formData.get('housingType') || '');
+  if (!housingType) {
+    showFieldError('housing-type', '住居費のタイプを選んでください。');
+    return null;
+  }
   let housingMonthlyMan = 0;
   let housingLoanEndAge = 0;
   let housingAfterMan = 0;
@@ -336,24 +449,29 @@ function collectAnswers() {
     housingLoanEndAge = Number(formData.get('housingLoanEndAge') || 0);
     housingAfterMan = Number(formData.get('housingAfter') || 0);
     if (!Number.isFinite(housingLoanEndAge) || housingLoanEndAge < currentAge) {
-      alert('ローンを完済する年齢は、今の年齢以降で入力してください。');
+      showFieldError('housing-loan-end', 'ローンを完済する年齢は、今の年齢以降で入力してください。');
       return null;
     }
   }
 
-  const numbers = [
-    cashMan, investMan, returnRate, monthlyInvestMan,
-    monthlyIncomeMan, monthlyExpenseMan, annualIncomeMan, annualExpenseMan,
-    severanceMan, pensionMan, bridgeIncomeMan,
-    retiredExpenseMan, retiredAnnualExpenseMan,
-    inflationRate, raiseRate, housingMonthlyMan, housingAfterMan,
+  const numberChecks = [
+    [cashMan, 'cash'], [investMan, 'invest'], [returnRate, 'return-rate'], [monthlyInvestMan, 'monthly-invest'],
+    [monthlyIncomeMan, 'monthly-income'], [monthlyExpenseMan, 'monthly-expense'],
+    [annualIncomeMan, 'annual-income'], [annualExpenseMan, 'annual-expense'],
+    [severanceMan, 'severance'], [pensionMan, 'pension'], [bridgeIncomeMan, 'bridge-income'],
+    [retiredExpenseMan, 'retired-expense'], [retiredAnnualExpenseMan, 'retired-annual-expense'],
+    [inflationRate, 'inflation-rate'], [raiseRate, 'raise-rate'],
+    [housingMonthlyMan, housingType === 'rent' ? 'housing-monthly-rent' : 'housing-monthly-loan'],
+    [housingAfterMan, 'housing-after'],
   ];
-  if (numbers.some((value) => !Number.isFinite(value))) {
-    alert('金額と利回りを入力してください。');
-    return null;
+  for (const [value, id] of numberChecks) {
+    if (!Number.isFinite(value)) {
+      showFieldError(id, 'この欄に数字を入力してください。');
+      return null;
+    }
   }
 
-  const events = collectEvents(formData)
+  const events = collectEvents()
     .filter((eventItem) => eventItem.name || eventItem.amountMan > 0)
     .filter((eventItem) => eventItem.age >= currentAge && eventItem.age <= endAge);
 
@@ -387,21 +505,6 @@ function collectAnswers() {
     events,
     answeredAt: new Date().toISOString(),
   };
-}
-
-function collectEvents(formData) {
-  const events = [];
-  for (let index = 0; index < MAX_EVENTS; index += 1) {
-    if (formData.get(`eventName${index}`) === null && formData.get(`eventAge${index}`) === null) continue;
-    const name = String(formData.get(`eventName${index}`) || '').trim();
-    const age = Number(formData.get(`eventAge${index}`));
-    const amountMan = Number(formData.get(`eventAmount${index}`) || 0);
-    const years = Math.max(1, Math.min(30, Math.round(Number(formData.get(`eventYears${index}`) || 1))));
-    const type = String(formData.get(`eventType${index}`) || 'expense');
-    if (!Number.isFinite(age) || !Number.isFinite(amountMan)) continue;
-    events.push({ name, age, amountMan, years, type });
-  }
-  return events;
 }
 
 /* ---------- 復元 ---------- */
@@ -441,8 +544,24 @@ function restoreAnswers() {
       setValue('spouse-pension', data.spouse.pensionMan);
     }
 
-    (data.children || []).slice(0, MAX_CHILDREN).forEach((child) => appendChildRow(child));
+    (data.children || []).slice(0, MAX_CHILDREN).forEach((child) => {
+      const nowAge = (data.currentAge || 0) - child.bornAtAge;
+      appendChildRow({
+        nowAge: Math.max(0, nowAge),
+        future: nowAge < 0,
+        yearsUntil: nowAge < 0 ? -nowAge : 1,
+        school: child.school,
+        univ: child.univ,
+        away: child.away,
+      });
+    });
     updateChildButton();
+
+    // 家族データがあれば折りたたみを開いた状態で復元
+    if (data.spouse || (data.children || []).length > 0) {
+      const familyDetails = document.getElementById('family-details');
+      if (familyDetails) familyDetails.open = true;
+    }
 
     if (data.housingType) {
       setValue('housing-type', data.housingType);
@@ -455,34 +574,20 @@ function restoreAnswers() {
       setupHousingUI();
     }
 
-    restoreEvents(data.events || []);
+    if (Array.isArray(data.events)) {
+      renderEvents(data.events);
+      if (data.events.some((e) => e.amountMan > 0)) {
+        const eventDetails = document.getElementById('event-details');
+        if (eventDetails) eventDetails.open = true;
+      }
+    }
   } catch (error) {
     sessionStorage.removeItem(ANSWER_KEY);
   }
 }
 
-function restoreEvents(events) {
-  const root = document.getElementById('event-list');
-  if (!root) return;
-  const existing = root.querySelectorAll('.event-row:not(.child-row)').length;
-  events.slice(0, MAX_EVENTS).forEach((eventItem, index) => {
-    if (index >= existing) appendEventRow(eventItem, index);
-    setNamedValue(`eventName${index}`, eventItem.name);
-    setNamedValue(`eventAge${index}`, eventItem.age);
-    setNamedValue(`eventAmount${index}`, eventItem.amountMan);
-    setNamedValue(`eventYears${index}`, eventItem.years || 1);
-    setNamedValue(`eventType${index}`, eventItem.type);
-  });
-  updateAddButton();
-}
-
 function setValue(id, value) {
   const el = document.getElementById(id);
-  if (el && value !== undefined && value !== null) el.value = value;
-}
-
-function setNamedValue(name, value) {
-  const el = document.querySelector(`[name="${CSS.escape(name)}"]`);
   if (el && value !== undefined && value !== null) el.value = value;
 }
 
